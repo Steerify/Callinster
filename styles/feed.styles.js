@@ -1,6 +1,6 @@
 import { COLORS } from "@/constants/theme";
 import { Dimensions, StyleSheet } from "react-native";
-import { useTheme } from "@/app/contexts/ThemeContext";
+import { useTheme } from "@/contexts/ThemeContext";
 const { width } = Dimensions.get("window");
 
 
