@@ -5,7 +5,7 @@ import * as Device from "expo-device";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import React, { useEffect, useState } from "react";
-import { useTheme } from "../contexts/ThemeContext";
+import { useTheme } from "../../contexts/ThemeContext";
 import {
   Alert,
   Image,
@@ -16,8 +16,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import NotificationSettings from "../components/NotificationSettings";
-import { useSubscription } from "../components/Subsceiption";
+import NotificationSettings from "../../components/NotificationSettings";
+import { useSubscription } from "../../components/Subsceiption";
 
 type NotificationData = {
   app: string;

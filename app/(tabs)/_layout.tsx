@@ -5,7 +5,7 @@ import { COLORS } from "@/constants/theme";
 import Index from "./index";
 import Notifications from "./notifications";
 import Profile from "./profile";
-import { useTheme } from "../contexts/ThemeContext";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const Tab = createMaterialTopTabNavigator();
 

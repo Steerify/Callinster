@@ -11,7 +11,7 @@ import * as Device from "expo-device";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import CallinsterCarousel from "../components/aboutCallinster";
+import CallinsterCarousel from "../../components/aboutCallinster";
 import {
   ActivityIndicator,
   Alert,
@@ -27,12 +27,12 @@ import {
   View,
 } from "react-native";
 import { Drawer } from "react-native-drawer-layout";
-import Contact from "../components/Contact";
-import Loader from "../components/Loader";
-import { useSubscription } from "../components/Subsceiption";
-import { useTheme } from "../contexts/ThemeContext";
-import { ThemeSwitch } from "../components/ThemeSwitch";
-import Carousel from "../components/homePageCarousel";
+import Contact from "../../components/Contact";
+import Loader from "../../components/Loader";
+import { useSubscription } from "../../components/Subsceiption";
+import { useTheme } from "../../contexts/ThemeContext";
+import { ThemeSwitch } from "../../components/ThemeSwitch";
+import Carousel from "../../components/homePageCarousel";
 
 type MyContact = {
   id: string;

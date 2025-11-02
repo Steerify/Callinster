@@ -1,11 +1,11 @@
 import * as Sentry from "sentry-expo";
 
-Sentry.init({
-  dsn: "your-sentry-dsn",
-  enableInExpoDevelopment: false,
-  debug: false,
-  tracesSampleRate: 0.2,
-});
+// Sentry.init({
+//   dsn: "your-sentry-dsn",
+//   enableInExpoDevelopment: false,
+//   debug: false,
+//   tracesSampleRate: 0.2,
+// });
 
 export const logError = (error: Error, context = {}) => {
   if (__DEV__) {

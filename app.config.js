@@ -1,4 +1,4 @@
-{
+module.exports = {
   "expo": {
     "name": "Callinster",
     "slug": "Callinster",
@@ -27,7 +27,7 @@
         "WAKE_LOCK",
         "READ_CONTACTS"
       ],
-      "googleServicesFile": "./google-services.json",
+      "googleServicesFile": process.env.GOOGLE_SERVICES_FILE,
       "versionCode": 1
     },
     "ios": {
@@ -60,11 +60,11 @@
       [
         "expo-notifications",
         {
-          "icon": "../assets/notification-icon.png",
+          "icon": "./assets/images/notification-icon.png",
           "color": "#ffffff",
-          "sounds": [
-            "./assets/notification-sound.wav"
-          ]
+          // "sounds": [
+          //   "./assets/notification-sound.wav"
+          // ]
         }
       ],
       "expo-font",
@@ -74,7 +74,7 @@
       "typedRoutes": true
     },
     "notification": {
-      "icon": "../assets/notification-icon.png",
+      "icon": "./assets/images/notification-icon.png",
       "color": "#5E72E4",
       "iosDisplayInForeground": true,
       "androidMode": "default",
@@ -86,8 +86,10 @@
     },
     "extra": {
       "eas": {
-        "projectId": "f6469325-638d-4eda-958c-b5dbcfc1064a"
-      }
-    }
+        "projectId": "ff36acd5-0fed-4940-8059-f37a63f1bd8c"
+      },
+      "router": {}
+    },
+    "owner": "samibyrone"
   }
 }

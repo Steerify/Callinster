@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { carouselStyles } from "../../styles/carousel.styles";
+import { carouselStyles } from "../styles/carousel.styles";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -27,7 +27,7 @@ type CarouselProps = {
   interval?: number;
 };
 
-export default function Carousel({ data, interval = 8000 }: CarouselProps) {
+export default function Carousel({ data, interval = 6000 }: CarouselProps) {
   const carouselRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
   const currentIndexRef = useRef(0);

@@ -11,7 +11,7 @@ import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { COLORS } from "@/constants/theme";
 import { useSSO } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
-import { useTheme } from "../contexts/ThemeContext";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const backgroundImage = require("../../assets/images/CallinsterBg.png");
 

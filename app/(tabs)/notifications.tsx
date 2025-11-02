@@ -14,10 +14,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Carousel from "../components/Carousel"; // Import the new Carousel component
-import Contact from "../components/Contact";
-import { useSubscription } from "../components/Subsceiption";
-import { useTheme } from "../contexts/ThemeContext";
+import Carousel from "../../components/Carousel"; // Import the new Carousel component
+import Contact from "../../components/Contact";
+import { useSubscription } from "../../components/Subsceiption";
+import { useTheme } from "../../contexts/ThemeContext";
 
 type MyContact = {
   id: string;
