@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 import { COLORS } from "../constants/theme";
 import { StyleSheet } from "react-native";
+=======
+import { COLORS } from "@/constants/theme";
+import { Dimensions, StyleSheet } from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
+const { width } = Dimensions.get("window");
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 
 
 export const styles = StyleSheet.create({

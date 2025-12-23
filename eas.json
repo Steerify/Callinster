@@ -1,4 +1,11 @@
 {
+<<<<<<< HEAD
+=======
+  "cli": {
+    "version": ">= 3.13.3",
+    "appVersionSource": "remote"
+  },
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
   "build": {
     "development": {
       "developmentClient": true,
@@ -10,6 +17,34 @@
         "buildType": "apk"
       }
     },
+<<<<<<< HEAD
     "production": {}
+=======
+    "production": {
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "env": {
+        "GOOGLE_SERVICES_FILE": "${GOOGLE_SERVICES_FILE}"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./pc-api-key.json",
+        "track": "production"
+      },
+      "ios": {
+        "appleId": "your-apple-id@example.com",
+        "ascAppId": "your-app-store-connect-app-id",
+        "appleTeamId": "your-team-id"
+      }
+    }
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
   }
 }

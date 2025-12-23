@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { COLORS } from "../../constants/theme";
 import { styles } from "../../styles/feed.styles";
+=======
+import { COLORS } from "@/constants/theme";
+import { styles } from "@/styles/feed.styles";
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -11,7 +16,11 @@ import * as Device from "expo-device";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+<<<<<<< HEAD
 import CallinsterCarousel from "../components/aboutCallinster";
+=======
+import CallinsterCarousel from "../../components/aboutCallinster";
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 import {
   ActivityIndicator,
   Alert,
@@ -27,12 +36,21 @@ import {
   View,
 } from "react-native";
 import { Drawer } from "react-native-drawer-layout";
+<<<<<<< HEAD
 import Contact from "../components/Contact";
 import Loader from "../components/Loader";
 import { useSubscription } from "../components/Subsceiption";
 import { useTheme } from "../contexts/ThemeContext";
 import { ThemeSwitch } from "../components/ThemeSwitch";
 import Carousel from "../components/homePageCarousel";
+=======
+import Contact from "../../components/Contact";
+import Loader from "../../components/Loader";
+import { useSubscription } from "../../components/Subsceiption";
+import { useTheme } from "../../contexts/ThemeContext";
+import { ThemeSwitch } from "../../components/ThemeSwitch";
+import Carousel from "../../components/homePageCarousel";
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 
 type MyContact = {
   id: string;
@@ -319,9 +337,15 @@ export default function Index() {
       title: "About Callinster",
       subtitle: "Learn more about our features",
       action: () => setCallinsterModalVisible(true),
+<<<<<<< HEAD
       textColor: "#c090f1ff",
       icon: "information-circle",
       bgImage: require("../../assets/images/Callinsterlogo(2).jpg"),
+=======
+      bgColor: "#fff0f3",
+      textColor: "#d6336c",
+      icon: "information-circle",
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
     },
     {
       key: "quote1",
@@ -486,6 +510,7 @@ export default function Index() {
     };
   }, [initiateCall]);
 
+<<<<<<< HEAD
 
 useEffect(() => {
   const filterContacts = () => {
@@ -529,6 +554,8 @@ useEffect(() => {
   filterContacts();
 }, [avoidPrefixes, avoidNamePrefixes, allContacts]);
 
+=======
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -537,6 +564,7 @@ useEffect(() => {
         const { data } = await Contacts.getContactsAsync({
           fields: [Contacts.Fields.PhoneNumbers],
         });
+<<<<<<< HEAD
         if (data.length === 0) {
           Alert.alert(
             "No Contacts Found",
@@ -545,10 +573,14 @@ useEffect(() => {
           setLoading(false);
           return;
         }
+=======
+
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
         const validContacts = data.filter(
           contact =>
             contact.phoneNumbers &&
             contact.phoneNumbers.length &&
+<<<<<<< HEAD
             !avoidPrefixes.some(prefix =>
               contact.phoneNumbers?.some(p =>
                 p.number?.replace(/\s+/g, "").startsWith(prefix)
@@ -557,6 +589,20 @@ useEffect(() => {
             contact.name &&
             !avoidNamePrefixes.some(prefix =>
               contact.name.trim().toLowerCase().startsWith(prefix.toLowerCase())
+=======
+            !contact.phoneNumbers.some(
+              phone =>
+                avoidPrefixes.some(prefix =>
+                  phone.number?.replace(/\s+/g, "").startsWith(prefix)
+                ) &&
+                contact.name &&
+                !avoidNamePrefixes.some(prefix =>
+                  contact.name
+                    .trim()
+                    .toLowerCase()
+                    .startsWith(prefix.toLowerCase())
+                )
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
             )
         );
 
@@ -570,6 +616,7 @@ useEffect(() => {
             : [],
         }));
 
+<<<<<<< HEAD
         const favorites = await AsyncStorage.getItem("favoriteContacts");
         const favoriteContacts = favorites ? JSON.parse(favorites) : [];
 
@@ -591,6 +638,11 @@ useEffect(() => {
 
         setAllContacts(shuffled);
         setFiveContacts([...favoritesToInclude, ...remainingContacts]);
+=======
+        const shuffled = mappedContacts.sort(() => 0.5 - Math.random());
+        setAllContacts(shuffled);
+        setFiveContacts(shuffled.slice(0, 5));
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
       } else {
         Alert.alert(
           "Permission Denied",
@@ -1054,7 +1106,11 @@ useEffect(() => {
         </SafeAreaView>
         <ScrollView style={{ flex: 1, marginBottom: 50 }}>
           {!loading && <Carousel data={homeCarouselData} />}
+<<<<<<< HEAD
 
+=======
+          
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
           <CallinsterCarousel
             visible={callinsterModalVisible}
             onClose={() => setCallinsterModalVisible(false)}
@@ -1465,6 +1521,7 @@ useEffect(() => {
                 maxHeight: "85%",
               }}
             >
+<<<<<<< HEAD
               <View
                 style={{
                   flexDirection: "row",
@@ -1489,6 +1546,17 @@ useEffect(() => {
                   />
                 </TouchableOpacity>
               </View>
+=======
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: "700",
+                  color: colors.text,
+                }}
+              >
+                Schedule a Call
+              </Text>
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 
               {/* App Selection */}
               <Text
@@ -1812,6 +1880,10 @@ useEffect(() => {
                 </View>
               </View>
 
+<<<<<<< HEAD
+=======
+              {/* Schedule Button */}
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
               <TouchableOpacity
                 style={{
                   backgroundColor: "#5E72E4",

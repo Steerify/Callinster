@@ -1,11 +1,19 @@
+<<<<<<< HEAD
 import { styles } from "../../styles/auth.styles";
+=======
+import { styles } from "@/styles/auth.styles";
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as Device from "expo-device";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import React, { useEffect, useState } from "react";
+<<<<<<< HEAD
 import { useTheme } from "../contexts/ThemeContext";
+=======
+import { useTheme } from "../../contexts/ThemeContext";
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 import {
   Alert,
   Image,
@@ -16,8 +24,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+<<<<<<< HEAD
 import NotificationSettings from "../components/NotificationSettings";
 import { useSubscription } from "../components/Subsceiption";
+=======
+import NotificationSettings from "../../components/NotificationSettings";
+import { useSubscription } from "../../components/Subsceiption";
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 
 type NotificationData = {
   app: string;

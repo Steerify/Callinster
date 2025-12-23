@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+// constants/theme.ts
+>>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 export const COLORS = {
   heart: "#FF5E7E",
   grey: "#a3a4a8ff",
