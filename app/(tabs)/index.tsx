@@ -1,26 +1,15 @@
-<<<<<<< HEAD
-import { COLORS } from "../../constants/theme";
-import { styles } from "../../styles/feed.styles";
-=======
 import { COLORS } from "@/constants/theme";
 import { styles } from "@/styles/feed.styles";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Button } from "@react-navigation/elements";
 import * as Contacts from "expo-contacts";
 import * as Device from "expo-device";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-<<<<<<< HEAD
-import CallinsterCarousel from "../components/aboutCallinster";
-=======
-import CallinsterCarousel from "../../components/aboutCallinster";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -36,21 +25,13 @@ import {
   View,
 } from "react-native";
 import { Drawer } from "react-native-drawer-layout";
-<<<<<<< HEAD
-import Contact from "../components/Contact";
-import Loader from "../components/Loader";
-import { useSubscription } from "../components/Subsceiption";
-import { useTheme } from "../contexts/ThemeContext";
-import { ThemeSwitch } from "../components/ThemeSwitch";
-import Carousel from "../components/homePageCarousel";
-=======
 import Contact from "../../components/Contact";
 import Loader from "../../components/Loader";
 import { useSubscription } from "../../components/Subsceiption";
-import { useTheme } from "../../contexts/ThemeContext";
 import { ThemeSwitch } from "../../components/ThemeSwitch";
+import CallinsterCarousel from "../../components/aboutCallinster";
 import Carousel from "../../components/homePageCarousel";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
+import { useTheme } from "../../contexts/ThemeContext";
 
 type MyContact = {
   id: string;
@@ -337,15 +318,10 @@ export default function Index() {
       title: "About Callinster",
       subtitle: "Learn more about our features",
       action: () => setCallinsterModalVisible(true),
-<<<<<<< HEAD
-      textColor: "#c090f1ff",
-      icon: "information-circle",
-      bgImage: require("../../assets/images/Callinsterlogo(2).jpg"),
-=======
       bgColor: "#fff0f3",
       textColor: "#d6336c",
       icon: "information-circle",
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
+      bgImage: require("../../assets/images/Callinsterlogo(2).jpg"),
     },
     {
       key: "quote1",
@@ -493,7 +469,7 @@ export default function Index() {
           Alert.alert(
             notification.request.content.title || "Call Time!",
             notification.request.content.body ||
-              "Time to make your scheduled call",
+            "Time to make your scheduled call",
             [
               { text: "Later", style: "cancel" },
               {
@@ -510,52 +486,47 @@ export default function Index() {
     };
   }, [initiateCall]);
 
-<<<<<<< HEAD
-
-useEffect(() => {
-  const filterContacts = () => {
-    if (allContacts.length > 0) {
-      const filtered = allContacts.filter(contact => 
-        contact.phoneNumbers &&
-        contact.phoneNumbers.length > 0 &&
-        !avoidPrefixes.some(prefix =>
-          contact.phoneNumbers?.some(p => 
-            p.number?.replace(/\s+/g, "").startsWith(prefix)
+  useEffect(() => {
+    const filterContacts = () => {
+      if (allContacts.length > 0) {
+        const filtered = allContacts.filter(contact =>
+          contact.phoneNumbers &&
+          contact.phoneNumbers.length > 0 &&
+          !avoidPrefixes.some(prefix =>
+            contact.phoneNumbers?.some(p =>
+              p.number?.replace(/\s+/g, "").startsWith(prefix)
+            )
+          ) &&
+          contact.name &&
+          !avoidNamePrefixes.some(prefix =>
+            contact.name
+              .trim()
+              .toLowerCase()
+              .startsWith(prefix.toLowerCase())
           )
-        ) &&
-        contact.name &&
-        !avoidNamePrefixes.some(prefix =>
-          contact.name
-            .trim()
-            .toLowerCase()
-            .startsWith(prefix.toLowerCase())
-        )
-      );
-      
-      setFiveContacts(prev => {
-        const remaining = filtered.filter(c => 
-          !prev.some(fc => fc.id === c.id)
         );
-        const validExisting = prev.filter(contact => 
-          filtered.some(fc => fc.id === contact.id)
-        );
-        if (validExisting.length < 5 && remaining.length > 0) {
-          const needed = 5 - validExisting.length;
-          const additional = remaining
-            .sort(() => 0.5 - Math.random())
-            .slice(0, needed);
-          return [...validExisting, ...additional];
-        }
-        return validExisting;
-      });
-    }
-  };
 
-  filterContacts();
-}, [avoidPrefixes, avoidNamePrefixes, allContacts]);
+        setFiveContacts(prev => {
+          const remaining = filtered.filter(c =>
+            !prev.some(fc => fc.id === c.id)
+          );
+          const validExisting = prev.filter(contact =>
+            filtered.some(fc => fc.id === contact.id)
+          );
+          if (validExisting.length < 5 && remaining.length > 0) {
+            const needed = 5 - validExisting.length;
+            const additional = remaining
+              .sort(() => 0.5 - Math.random())
+              .slice(0, needed);
+            return [...validExisting, ...additional];
+          }
+          return validExisting;
+        });
+      }
+    };
 
-=======
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
+    filterContacts();
+  }, [avoidPrefixes, avoidNamePrefixes, allContacts]);
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -564,23 +535,11 @@ useEffect(() => {
         const { data } = await Contacts.getContactsAsync({
           fields: [Contacts.Fields.PhoneNumbers],
         });
-<<<<<<< HEAD
-        if (data.length === 0) {
-          Alert.alert(
-            "No Contacts Found",
-            "Please add contacts to your device."
-          );
-          setLoading(false);
-          return;
-        }
-=======
 
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
         const validContacts = data.filter(
           contact =>
             contact.phoneNumbers &&
             contact.phoneNumbers.length &&
-<<<<<<< HEAD
             !avoidPrefixes.some(prefix =>
               contact.phoneNumbers?.some(p =>
                 p.number?.replace(/\s+/g, "").startsWith(prefix)
@@ -589,34 +548,20 @@ useEffect(() => {
             contact.name &&
             !avoidNamePrefixes.some(prefix =>
               contact.name.trim().toLowerCase().startsWith(prefix.toLowerCase())
-=======
-            !contact.phoneNumbers.some(
-              phone =>
-                avoidPrefixes.some(prefix =>
-                  phone.number?.replace(/\s+/g, "").startsWith(prefix)
-                ) &&
-                contact.name &&
-                !avoidNamePrefixes.some(prefix =>
-                  contact.name
-                    .trim()
-                    .toLowerCase()
-                    .startsWith(prefix.toLowerCase())
-                )
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
             )
-        );
+        )
+
 
         const mappedContacts: MyContact[] = validContacts.map(contact => ({
           id: contact.id ?? "",
           name: contact.name ?? "",
           phoneNumbers: contact.phoneNumbers
             ? [...new Set(contact.phoneNumbers.map(p => p.number ?? ""))]
-                .filter(num => num)
-                .map(num => ({ number: num }))
+              .filter(num => num)
+              .map(num => ({ number: num }))
             : [],
         }));
 
-<<<<<<< HEAD
         const favorites = await AsyncStorage.getItem("favoriteContacts");
         const favoriteContacts = favorites ? JSON.parse(favorites) : [];
 
@@ -638,11 +583,6 @@ useEffect(() => {
 
         setAllContacts(shuffled);
         setFiveContacts([...favoritesToInclude, ...remainingContacts]);
-=======
-        const shuffled = mappedContacts.sort(() => 0.5 - Math.random());
-        setAllContacts(shuffled);
-        setFiveContacts(shuffled.slice(0, 5));
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
       } else {
         Alert.alert(
           "Permission Denied",
@@ -852,13 +792,13 @@ useEffect(() => {
 
   type WeeklyPreferences = {
     [key in
-      | "monday"
-      | "tuesday"
-      | "wednesday"
-      | "thursday"
-      | "friday"
-      | "saturday"
-      | "sunday"]: DayPreference;
+    | "monday"
+    | "tuesday"
+    | "wednesday"
+    | "thursday"
+    | "friday"
+    | "saturday"
+    | "sunday"]: DayPreference;
   };
 
   const [weeklyPreferences, setWeeklyPreferences] = useState<WeeklyPreferences>(
@@ -1106,11 +1046,7 @@ useEffect(() => {
         </SafeAreaView>
         <ScrollView style={{ flex: 1, marginBottom: 50 }}>
           {!loading && <Carousel data={homeCarouselData} />}
-<<<<<<< HEAD
 
-=======
-          
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
           <CallinsterCarousel
             visible={callinsterModalVisible}
             onClose={() => setCallinsterModalVisible(false)}
@@ -1467,37 +1403,41 @@ useEffect(() => {
             </Modal>
           </Modal>
 
-          {loading && !searchQuery.trim() && (
-            <Loader
-              size="large"
-              style={{ flex: 1, backgroundColor: colors.background }}
-            />
-          )}
+          {
+            loading && !searchQuery.trim() && (
+              <Loader
+                size="large"
+                style={{ flex: 1, backgroundColor: colors.background }}
+              />
+            )
+          }
 
-          {searching ? (
-            <Loader
-              size="large"
-              style={{ flex: 1, backgroundColor: colors.background }}
-            />
-          ) : (
-            (searchQuery.trim() ? allContacts : fiveContacts)
-              .filter((contact: MyContact) =>
-                contact.name.toLowerCase().includes(searchQuery.toLowerCase())
-              )
-              .map((contact: MyContact) => (
-                <View key={contact.id}>
-                  <Contact
-                    contact={contact}
-                    onDelete={() => {
-                      void handleDelete(contact.id);
-                    }}
-                    showHeart={tier === "elite"}
-                    weeklyPreferences={weeklyPreferences}
-                  />
-                </View>
-              ))
-          )}
-        </ScrollView>
+          {
+            searching ? (
+              <Loader
+                size="large"
+                style={{ flex: 1, backgroundColor: colors.background }}
+              />
+            ) : (
+              (searchQuery.trim() ? allContacts : fiveContacts)
+                .filter((contact: MyContact) =>
+                  contact.name.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                .map((contact: MyContact) => (
+                  <View key={contact.id}>
+                    <Contact
+                      contact={contact}
+                      onDelete={() => {
+                        void handleDelete(contact.id);
+                      }}
+                      showHeart={tier === "elite"}
+                      weeklyPreferences={weeklyPreferences}
+                    />
+                  </View>
+                ))
+            )
+          }
+        </ScrollView >
 
         <Modal
           animationType="slide"
@@ -1521,7 +1461,6 @@ useEffect(() => {
                 maxHeight: "85%",
               }}
             >
-<<<<<<< HEAD
               <View
                 style={{
                   flexDirection: "row",
@@ -1539,24 +1478,9 @@ useEffect(() => {
                   Schedule a Call
                 </Text>
                 <TouchableOpacity onPress={() => setCallModalVisible(false)}>
-                  <Ionicons
-                    name="close-outline"
-                    size={26}
-                    color={COLORS.heart}
-                  />
+                  <Ionicons name="close-outline" size={26} color={COLORS.heart} />
                 </TouchableOpacity>
               </View>
-=======
-              <Text
-                style={{
-                  fontSize: 24,
-                  fontWeight: "700",
-                  color: colors.text,
-                }}
-              >
-                Schedule a Call
-              </Text>
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 
               {/* App Selection */}
               <Text
@@ -1690,15 +1614,15 @@ useEffect(() => {
                     value={contactInput}
                     placeholder={
                       selectedApp &&
-                      callingApps.find(a => a.id === selectedApp)
-                        ?.requiresUsername
+                        callingApps.find(a => a.id === selectedApp)
+                          ?.requiresUsername
                         ? "Enter username or ID"
                         : "Enter phone number"
                     }
                     keyboardType={
                       selectedApp &&
-                      callingApps.find(a => a.id === selectedApp)
-                        ?.requiresUsername
+                        callingApps.find(a => a.id === selectedApp)
+                          ?.requiresUsername
                         ? "default"
                         : "phone-pad"
                     }
@@ -1880,10 +1804,7 @@ useEffect(() => {
                 </View>
               </View>
 
-<<<<<<< HEAD
-=======
               {/* Schedule Button */}
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
               <TouchableOpacity
                 style={{
                   backgroundColor: "#5E72E4",
@@ -1906,11 +1827,11 @@ useEffect(() => {
                   </Text>
                 )}
               </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+            </View >
+          </View >
+        </Modal >
         {/* Weekly Preferences Modal */}
-        <Modal
+        < Modal
           visible={showPreferencesModal}
           transparent
           animationType="slide"
@@ -1984,7 +1905,7 @@ useEffect(() => {
                             ...weeklyPreferences,
                             [day]: {
                               ...weeklyPreferences[
-                                day as keyof WeeklyPreferences
+                              day as keyof WeeklyPreferences
                               ],
                               calls: !prefs.calls,
                             },
@@ -2015,7 +1936,7 @@ useEffect(() => {
                             ...weeklyPreferences,
                             [day]: {
                               ...weeklyPreferences[
-                                day as keyof WeeklyPreferences
+                              day as keyof WeeklyPreferences
                               ],
                               messages: !prefs.messages,
                             },
@@ -2091,8 +2012,8 @@ useEffect(() => {
               </View>
             </View>
           </View>
-        </Modal>
-      </View>
-    </Drawer>
+        </Modal >
+      </View >
+    </Drawer >
   );
 }

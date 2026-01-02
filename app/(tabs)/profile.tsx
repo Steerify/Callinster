@@ -1,19 +1,10 @@
-<<<<<<< HEAD
-import { styles } from "../../styles/auth.styles";
-=======
 import { styles } from "@/styles/auth.styles";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as Device from "expo-device";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
-import React, { useEffect, useState } from "react";
-<<<<<<< HEAD
-import { useTheme } from "../contexts/ThemeContext";
-=======
-import { useTheme } from "../../contexts/ThemeContext";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
+import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -24,13 +15,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-<<<<<<< HEAD
-import NotificationSettings from "../components/NotificationSettings";
-import { useSubscription } from "../components/Subsceiption";
-=======
 import NotificationSettings from "../../components/NotificationSettings";
 import { useSubscription } from "../../components/Subsceiption";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
+import { useTheme } from "../../contexts/ThemeContext";
 
 type NotificationData = {
   app: string;
@@ -57,7 +44,7 @@ export default function Profile() {
   const { tier } = useSubscription();
   const { user } = useUser();
   const { signOut } = useAuth();
-  const {colors} = useTheme()
+  const { colors } = useTheme()
   const [notificationModalVisible, setNotificationModalVisible] =
     useState(false);
 
@@ -188,7 +175,7 @@ export default function Profile() {
   };
 
   return (
-    <View style={[styles.container, { padding: 20, justifyContent: "center",backgroundColor:colors.background }]}>
+    <View style={[styles.container, { padding: 20, justifyContent: "center", backgroundColor: colors.background }]}>
       {/* Profile Header */}
       <ImageBackground
         source={backgroundImage}

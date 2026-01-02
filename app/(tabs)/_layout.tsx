@@ -1,19 +1,10 @@
-import React from "react";
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { Ionicons } from "@expo/vector-icons";
-<<<<<<< HEAD
-import { COLORS } from "../../constants/theme";
-import Index from "./index";
-import Notifications from "./notifications";
-import Profile from "./profile";
-import { useTheme } from "../contexts/ThemeContext";
-=======
 import { COLORS } from "@/constants/theme";
+import { Ionicons } from "@expo/vector-icons";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { useTheme } from "../../contexts/ThemeContext";
 import Index from "./index";
 import Notifications from "./notifications";
 import Profile from "./profile";
-import { useTheme } from "../../contexts/ThemeContext";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -33,9 +24,9 @@ export default function TabLayout() {
           bottom: 0,
           left: 0,
           right: 0,
-          borderTopWidth: 0, 
+          borderTopWidth: 0,
         },
-        swipeEnabled: true, 
+        swipeEnabled: true,
       }}
     >
       <Tab.Screen

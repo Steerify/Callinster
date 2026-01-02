@@ -1,11 +1,8 @@
 {
-<<<<<<< HEAD
-=======
   "cli": {
     "version": ">= 3.13.3",
     "appVersionSource": "remote"
   },
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
   "build": {
     "development": {
       "developmentClient": true,
@@ -17,9 +14,6 @@
         "buildType": "apk"
       }
     },
-<<<<<<< HEAD
-    "production": {}
-=======
     "production": {
       "autoIncrement": true,
       "android": {
@@ -45,6 +39,5 @@
         "appleTeamId": "your-team-id"
       }
     }
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
   }
 }

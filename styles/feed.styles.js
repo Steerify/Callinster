@@ -1,12 +1,6 @@
-<<<<<<< HEAD
-import { COLORS } from "../constants/theme";
-import { StyleSheet } from "react-native";
-=======
 import { COLORS } from "@/constants/theme";
 import { Dimensions, StyleSheet } from "react-native";
-import { useTheme } from "@/contexts/ThemeContext";
 const { width } = Dimensions.get("window");
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 
 
 export const styles = StyleSheet.create({
@@ -16,22 +10,22 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     paddingHorizontal: 16,
   },
-    searchContainer: {
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 5,
-    backgroundColor: 'white', 
-    borderRadius: 30, 
-    alignSelf:"center",
-    marginTop:12,
-    marginLeft:15,
-    marginBottom:-6,
-    width:270
+    backgroundColor: 'white',
+    borderRadius: 30,
+    alignSelf: "center",
+    marginTop: 12,
+    marginLeft: 15,
+    marginBottom: -6,
+    width: 270
   },
   menuButton: {
     marginRight: 12,
-    marginLeft:12,
-    color:COLORS.primary
+    marginLeft: 12,
+    color: COLORS.primary
   },
 
   header: {

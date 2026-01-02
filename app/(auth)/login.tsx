@@ -1,26 +1,16 @@
-import React, { useEffect, useState, useRef } from "react";
+import { styles } from "@/styles/auth.styles";
+import { useSSO } from "@clerk/clerk-expo";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
   Animated,
   ImageBackground,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-<<<<<<< HEAD
-import { styles } from "../../styles/auth.styles";
-import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
-import { COLORS } from "../../constants/theme";
-import { useSSO } from "@clerk/clerk-expo";
-import { useRouter} from "expo-router";
-import { useTheme } from "../contexts/ThemeContext";
-=======
-import { styles } from "@/styles/auth.styles";
-import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
-import { COLORS } from "@/constants/theme";
-import { useSSO } from "@clerk/clerk-expo";
-import { useRouter } from "expo-router";
 import { useTheme } from "../../contexts/ThemeContext";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 
 const backgroundImage = require("../../assets/images/CallinsterBg.png");
 

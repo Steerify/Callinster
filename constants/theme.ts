@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 // constants/theme.ts
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 export const COLORS = {
   heart: "#FF5E7E",
   grey: "#a3a4a8ff",
@@ -17,7 +14,7 @@ export const LIGHT_COLORS = {
   background: "#ecececff",
   surface: "#ffffffff",
   text: "#1b3872ff",
-  text2:"#1b3872ff",
+  text2: "#1b3872ff",
   textSecondary: "#4A5568",
   border: "#E2E8F0",
   input: "#ffffffff",
@@ -41,7 +38,7 @@ export const DARK_COLORS = {
   background: "#0A0F2C",
   surface: "#192046",
   text: "#F5F7FB",
-  text2:"#170957",
+  text2: "#170957",
   textSecondary: "#A0AEC0",
   border: "#404564ff",
   input: "#ffffffff",

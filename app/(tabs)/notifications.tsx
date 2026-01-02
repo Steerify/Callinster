@@ -1,34 +1,14 @@
-<<<<<<< HEAD
-import { COLORS } from "../../constants/theme";
-import { styles } from "../../styles/feed.styles";
-=======
 import { COLORS } from "@/constants/theme";
 import { styles } from "@/styles/feed.styles";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-<<<<<<< HEAD
-=======
   FlatList,
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
   Image,
   Linking,
   RefreshControl,
   SafeAreaView,
-<<<<<<< HEAD
-  Text,
-  TouchableOpacity,
-  View,
-  FlatList,
-  ScrollView
-} from "react-native";
-import { useTheme } from "../contexts/ThemeContext";
-import Contact from "../components/Contact";
-import { useSubscription } from "../components/Subsceiption";
-import Carousel from "../components/Carousel"; 
-=======
   ScrollView,
   Text,
   TouchableOpacity,
@@ -38,7 +18,6 @@ import Carousel from "../../components/Carousel"; // Import the new Carousel com
 import Contact from "../../components/Contact";
 import { useSubscription } from "../../components/Subsceiption";
 import { useTheme } from "../../contexts/ThemeContext";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 
 type MyContact = {
   id: string;
@@ -55,11 +34,7 @@ export default function Notifications() {
   const [showSubModal, setShowSubModal] = useState(false);
 
   const loadFavorites = useCallback(() => {
-<<<<<<< HEAD
-    AsyncStorage.getItem("favoriteContacts").then((data) => {
-=======
     AsyncStorage.getItem("favoriteContacts").then(data => {
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
       if (data) setFavorites(JSON.parse(data));
       else setFavorites([]);
     });
@@ -72,11 +47,7 @@ export default function Notifications() {
   }, [tier, loadFavorites]);
 
   const handleRemoveFavorite = async (contactId: string) => {
-<<<<<<< HEAD
-    const updated = favorites.filter((c) => c.id !== contactId);
-=======
     const updated = favorites.filter(c => c.id !== contactId);
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
     setFavorites(updated);
     await AsyncStorage.setItem("favoriteContacts", JSON.stringify(updated));
   };
@@ -123,22 +94,19 @@ export default function Notifications() {
     },
     ...(!isElite
       ? [
-          {
-            key: "ad",
-            title: "Upgrade to Elite",
-            subtitle: "Unlock all premium features!",
-            bgColor: "#fff8e6",
-            textColor: "#e67700",
-            icon: "star",
-          },
-        ]
+        {
+          key: "ad",
+          title: "Upgrade to Elite",
+          subtitle: "Unlock all premium features!",
+          bgColor: "#fff8e6",
+          textColor: "#e67700",
+          icon: "star",
+        },
+      ]
       : []),
   ];
 
-<<<<<<< HEAD
-  // If not elite tier, show upgrade screen
-=======
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
+
   if (tier !== "elite") {
     const isPremium = tier === "premium";
     return (
@@ -261,25 +229,6 @@ export default function Notifications() {
     );
   }
 
-<<<<<<< HEAD
-  // For elite tier - use ScrollView with RefreshControl when list is empty
-  if (favorites.length === 0) {
-    return (
-      <ScrollView
-        style={[styles.container, { backgroundColor: colors.background }]}
-        contentContainerStyle={{ flex: 1 }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={["#6200EE", "#3700B3", "#03DAC6"]}
-          />
-        }
-      >
-        <SafeAreaView style={styles.header}>
-          <View
-            style={{ flexDirection: "row", alignItems: "center", marginTop: 20 }}
-=======
   if (favorites.length === 0) {
     return (
       <View
@@ -298,7 +247,6 @@ export default function Notifications() {
               alignItems: "center",
               marginTop: 20,
             }}
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
           >
             <Image
               source={require("../../assets/images/splash-icon.png")}
@@ -308,35 +256,6 @@ export default function Notifications() {
             <Text style={[styles.appName, { color: colors.text }]}>
               Favorites
             </Text>
-<<<<<<< HEAD
-            <TouchableOpacity
-              style={{
-                borderRadius: 20,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Ionicons name="log-out-outline" size={24} color={COLORS.grey} />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-
-        <Carousel data={carouselData} />
-
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: colors.text, fontSize: 16, marginBottom: 6 }}>
-            No favorite contacts yet.
-          </Text>
-          <Text style={{ color: colors.text, fontSize: 14, textAlign: 'center', paddingHorizontal: 40 }}>
-            Pull down to refresh 
-          </Text>
-        </View>
-      </ScrollView>
-    );
-  }
-
-  // For elite tier with favorites - use FlatList as before
-=======
           </View>
         </SafeAreaView>
 
@@ -356,7 +275,7 @@ export default function Notifications() {
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
             {/* Heart Icon */}
-            <View style={{ marginBottom: 20 ,marginTop: -100}}>
+            <View style={{ marginBottom: 20, marginTop: -100 }}>
               <Ionicons name="heart" size={64} color={colors.text} />
             </View>
 
@@ -375,8 +294,6 @@ export default function Notifications() {
       </View>
     );
   }
-
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <SafeAreaView style={styles.header}>
@@ -403,20 +320,13 @@ export default function Notifications() {
         </View>
       </SafeAreaView>
 
-<<<<<<< HEAD
-=======
       {/* Use the new Carousel component */}
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
       <Carousel data={carouselData} />
 
       {/* Favorites List */}
       <FlatList
         data={favorites}
-<<<<<<< HEAD
-        keyExtractor={(item) => item.id}
-=======
         keyExtractor={item => item.id}
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
         style={{ marginBottom: 50 }}
         renderItem={({ item }) => (
           <Contact
@@ -424,15 +334,6 @@ export default function Notifications() {
             showHeart={false}
             onDelete={() => handleRemoveFavorite(item.id)}
             weeklyPreferences={{
-<<<<<<< HEAD
-              monday: { calls: false, messages: false },
-              tuesday: { calls: false, messages: false },
-              wednesday: { calls: false, messages: false },
-              thursday: { calls: false, messages: false },
-              friday: { calls: false, messages: false },
-              saturday: { calls: false, messages: false },
-              sunday: { calls: false, messages: false },
-=======
               monday: {
                 calls: false,
                 messages: false,
@@ -461,7 +362,6 @@ export default function Notifications() {
                 calls: false,
                 messages: false,
               },
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
             }}
           />
         )}
@@ -475,8 +375,4 @@ export default function Notifications() {
       />
     </View>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e

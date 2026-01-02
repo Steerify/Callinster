@@ -4,13 +4,8 @@ import { useFonts } from "expo-font";
 import { SplashScreen } from "expo-router";
 import { useCallback } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-<<<<<<< HEAD
-import InitialLayout from "./components/initialLayout";
-import { ThemeProvider } from "./contexts/ThemeContext";
-=======
 import InitialLayout from "../components/initialLayout";
 import { ThemeProvider } from "../contexts/ThemeContext";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 // import { SubscriptionProvider } from "./components/Subsceiption";
 
 SplashScreen.preventAutoHideAsync();
