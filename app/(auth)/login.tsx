@@ -1,15 +1,18 @@
 import { styles } from "@/styles/auth.styles";
 import { useSSO } from "@clerk/clerk-expo";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  Animated,
   ImageBackground,
+  Animated as RNAnimated,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useTheme } from "../../contexts/ThemeContext";
 
 const backgroundImage = require("../../assets/images/CallinsterBg.png");
@@ -54,9 +57,18 @@ export default function Login() {
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
 
-  // Animation refs
-  const slideAnim = useRef(new Animated.Value(-300)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  // Animation refs (Legacy Animated for text)
+  const slideAnim = useRef(new RNAnimated.Value(-300)).current;
+  const fadeAnim = useRef(new RNAnimated.Value(0)).current;
+
+  // Reanimated shared value for button scale
+  const buttonScale = useSharedValue(1);
+
+  const buttonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: buttonScale.value }],
+    };
+  });
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
@@ -65,14 +77,14 @@ export default function Login() {
     if (charIndex === 0) {
       slideAnim.setValue(-100);
       fadeAnim.setValue(0);
-      Animated.parallel([
-        Animated.spring(slideAnim, {
+      RNAnimated.parallel([
+        RNAnimated.spring(slideAnim, {
           toValue: 0,
           speed: 10,
           bounciness: 10,
           useNativeDriver: true,
         }),
-        Animated.timing(fadeAnim, {
+        RNAnimated.timing(fadeAnim, {
           toValue: 5,
           duration: 1000,
           useNativeDriver: true,
@@ -111,51 +123,72 @@ export default function Login() {
     }
   };
 
+  const handlePressIn = () => {
+    buttonScale.value = withSpring(0.95);
+  };
+
+  const handlePressOut = () => {
+    buttonScale.value = withSpring(1);
+  };
+
   return (
     <ImageBackground
       source={backgroundImage}
       style={styles.container}
       resizeMode="cover"
     >
-      <View style={styles.loginContainer}>
-        {/* Brand Section */}
-        <View style={styles.brandSection}></View>
+      <LinearGradient
+        colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.8)']}
+        style={styles.gradientOverlay}
+      >
+        <View style={styles.loginContainer}>
+          {/* Brand Section */}
+          <View style={styles.brandSection}></View>
 
-        {/* Login Section */}
-        <View style={styles.loginSection}>
-          {/* Animated Typewriter Catchy Phrase */}
-          <Animated.Text
-            style={[
-              styles.appName,
-              {
-                transform: [{ translateX: slideAnim }],
-                opacity: fadeAnim,
-              },
-            ]}
-          >
-            {displayedText}
-          </Animated.Text>
+          {/* Login Section with Blur */}
+          <View style={styles.loginWrapper}>
+            <BlurView intensity={20} tint="dark" style={styles.blurContainer}>
+              <View style={[styles.loginSection, { backgroundColor: 'transparent' }]}>
+                {/* Animated Typewriter Catchy Phrase */}
+                <RNAnimated.Text
+                  style={[
+                    styles.appName,
+                    {
+                      transform: [{ translateX: slideAnim }],
+                      opacity: fadeAnim,
+                    },
+                  ]}
+                >
+                  {displayedText}
+                </RNAnimated.Text>
 
-          {/* Google Sign-In Button */}
-          <TouchableOpacity
-            style={styles.googleButton}
-            onPress={handleGoogleSignIn}
-            activeOpacity={0.7}
-          >
-            <FontAwesome5
-              name="google"
-              size={20}
-              color="#1877F3"
-              style={{ marginHorizontal: 5 }}
-            />
-            <Text style={styles.googleButtonText}>Continue with Google</Text>
-          </TouchableOpacity>
+                {/* Google Sign-In Button */}
+                <Animated.View style={[buttonAnimatedStyle, { width: '100%', alignItems: 'center' }]}>
+                  <TouchableOpacity
+                    style={styles.googleButton}
+                    onPress={handleGoogleSignIn}
+                    onPressIn={handlePressIn}
+                    onPressOut={handlePressOut}
+                    activeOpacity={0.9}
+                  >
+                    <FontAwesome5
+                      name="google"
+                      size={20}
+                      color="#1877F3"
+                      style={{ marginHorizontal: 5 }}
+                    />
+                    <Text style={styles.googleButtonText}>Continue with Google</Text>
+                  </TouchableOpacity>
+                </Animated.View>
 
-          <Text style={styles.termsText}>
-            By continuing, you agree to our Terms and Privacy Policy
-          </Text>
+                <Text style={styles.termsText}>
+                  By continuing, you agree to our Terms and Privacy Policy
+                </Text>
+              </View>
+            </BlurView>
+          </View>
         </View>
-      </View>
+      </LinearGradient>
     </ImageBackground>
   );
 }

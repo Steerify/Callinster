@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import { COLORS } from "../constants/theme";
 
 const { width, height } = Dimensions.get("window");
@@ -8,19 +8,25 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-    loginContainer: {
+  gradientOverlay: {
     flex: 1,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loginContainer: {
+    flex: 1,
+    width: "100%",
   },
   brandSection: {
     alignItems: "center",
     marginTop: height * 0.12,
-    
   },
   logo: {
     width: 100,
     height: 100,
   },
-   name: {
+  name: {
     fontSize: 15,
     fontWeight: "400",
     fontFamily: "JetBrainsMono-Medium",
@@ -28,18 +34,19 @@ export const styles = StyleSheet.create({
     letterSpacing: 0,
     textAlign: "center",
     marginTop: 90,
-    alignSelf: 'center', 
-},
- appName: {
+    alignSelf: 'center',
+  },
+  appName: {
     fontSize: 15,
     fontWeight: "400",
     fontFamily: "JetBrainsMono-Medium",
     color: COLORS.white,
     letterSpacing: 0,
     textAlign: "center",
-    marginTop: 90,
-    alignSelf: 'center', 
-},
+    marginTop: 10,
+    marginBottom: 20,
+    alignSelf: 'center',
+  },
   tagline: {
     fontSize: 16,
     color: COLORS.grey,
@@ -57,13 +64,27 @@ export const styles = StyleSheet.create({
     height: width * 1,
     maxHeight: 280,
   },
+  loginWrapper: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "flex-end",
+    paddingBottom: 50,
+    paddingHorizontal: 20,
+    alignItems: "center",
+  },
+  blurContainer: {
+    width: "100%",
+    maxWidth: 500,
+    borderRadius: 24,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+  },
   loginSection: {
-    flex:1,
     width: "100%",
     paddingHorizontal: 24,
-    paddingBottom: 80,
+    paddingVertical: 32,
     alignItems: "center",
-    justifyContent: "flex-end",
   },
 
   googleButton: {
@@ -75,7 +96,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 14,
     marginBottom: 20,
-    marginTop: 30,
+    marginTop: 10,
 
     width: "100%",
     maxWidth: 300,
