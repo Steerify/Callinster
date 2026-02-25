@@ -61,14 +61,10 @@ module.exports = {
         "expo-notifications",
         {
           "icon": "./assets/images/notification-icon.png",
-          "color": "#ffffff",
-          // "sounds": [
-          //   "./assets/notification-sound.wav"
-          // ]
+          "color": "#ffffff"
         }
       ],
-      "expo-font",
-      "sentry-expo"
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
@@ -82,14 +78,13 @@ module.exports = {
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/your-project-id"
+      "url": "https://u.expo.dev/85f39e43-cf2f-4045-8a69-1b8caff0b399"
     },
     "extra": {
       "eas": {
-        "projectId": "ff36acd5-0fed-4940-8059-f37a63f1bd8c"
-      },
-      "router": {}
+        "projectId": "85f39e43-cf2f-4045-8a69-1b8caff0b399"
+      }
     },
-    "owner": "samibyrone"
+    "owner": "steerify9ja"
   }
 }

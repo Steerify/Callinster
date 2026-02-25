@@ -32,7 +32,9 @@
       "buildNumber": "1.0.0",
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification"],
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
         "NSContactsUsageDescription": "Allow Callinster to access your contacts for easy call scheduling"
       }
     },
@@ -64,12 +66,11 @@
     "experiments": {
       "typedRoutes": true
     },
-
     "extra": {
-      "router": {},
       "eas": {
         "projectId": "85f39e43-cf2f-4045-8a69-1b8caff0b399"
       }
-    }
+    },
+    "owner": "steerify9ja"
   }
 }
