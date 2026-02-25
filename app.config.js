@@ -20,7 +20,6 @@ module.exports = {
       },
       "edgeToEdgeEnabled": true,
       "package": "com.callinster",
-      "useNextNotificationsApi": true,
       "permissions": [
         "NOTIFICATIONS",
         "SCHEDULE_EXACT_ALARM",
@@ -60,7 +59,7 @@ module.exports = {
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/notification-icon.png",
+          "icon": "./assets/images/icon.png",
           "color": "#ffffff"
         }
       ],
@@ -70,7 +69,7 @@ module.exports = {
       "typedRoutes": true
     },
     "notification": {
-      "icon": "./assets/images/notification-icon.png",
+      "icon": "./assets/images/icon.png",
       "color": "#5E72E4",
       "iosDisplayInForeground": true,
       "androidMode": "default",
