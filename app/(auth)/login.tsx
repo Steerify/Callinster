@@ -1,28 +1,19 @@
-import React, { useEffect, useState, useRef } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Animated,
-  ImageBackground,
-} from "react-native";
-<<<<<<< HEAD
-import { styles } from "../../styles/auth.styles";
-import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
-import { COLORS } from "../../constants/theme";
 import { useSSO } from "@clerk/clerk-expo";
-import { useRouter} from "expo-router";
-import { useTheme } from "../contexts/ThemeContext";
-=======
-import { styles } from "@/styles/auth.styles";
-import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
-import { COLORS } from "@/constants/theme";
-import { useSSO } from "@clerk/clerk-expo";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useTheme } from "../../contexts/ThemeContext";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
+import { useEffect, useRef, useState } from "react";
+import {
+    Animated,
+    Dimensions,
+    ImageBackground,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 const backgroundImage = require("../../assets/images/CallinsterBg.png");
+const { height } = Dimensions.get("window");
 
 const phrases = [
   "Think Smart, Grow Your Horizon.",
@@ -44,12 +35,8 @@ const phrases = [
   "Start Small, Dream Monumental.",
   "Connect Fearlessly, Thrive Daily.",
   "Link Up, Level Beyond.",
-  "Swipe Right to Success.",
-  "Contacts In, Opportunities Unleashed.",
-  "Tap In, Rise Up.",
   "Network Today, Win Tomorrow.",
   "Grow Circles, Harvest Gold.",
-  "Meet, Match, Multiply Magic.",
   "From Hello to Hero.",
   "Unlock, Link, Lead Boldly.",
 ];
@@ -57,34 +44,30 @@ const phrases = [
 export default function Login() {
   const { startSSOFlow } = useSSO();
   const router = useRouter();
-  const colors = useTheme();
 
-  // Typewriter effect state
   const [displayedText, setDisplayedText] = useState("");
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
 
-  // Animation refs
-  const slideAnim = useRef(new Animated.Value(-300)).current;
+  const slideAnim = useRef(new Animated.Value(-100)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
 
-    // Reset animations when phrase changes
     if (charIndex === 0) {
-      slideAnim.setValue(-100);
+      slideAnim.setValue(-80);
       fadeAnim.setValue(0);
       Animated.parallel([
         Animated.spring(slideAnim, {
           toValue: 0,
-          speed: 10,
-          bounciness: 10,
+          speed: 12,
+          bounciness: 8,
           useNativeDriver: true,
         }),
         Animated.timing(fadeAnim, {
-          toValue: 5,
-          duration: 1000,
+          toValue: 1,
+          duration: 600,
           useNativeDriver: true,
         }),
       ]).start();
@@ -94,17 +77,17 @@ export default function Login() {
       timeout = setTimeout(() => {
         setDisplayedText(prev => prev + phrases[phraseIndex][charIndex]);
         setCharIndex(prev => prev + 1);
-      }, 50);
+      }, 45);
     } else {
       timeout = setTimeout(() => {
         setDisplayedText("");
         setCharIndex(0);
         setPhraseIndex(prev => (prev + 1) % phrases.length);
-      }, 2000);
+      }, 2400);
     }
 
     return () => clearTimeout(timeout);
-  }, [charIndex, phraseIndex, fadeAnim, slideAnim]);
+  }, [charIndex, phraseIndex]);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -127,9 +110,12 @@ export default function Login() {
       style={styles.container}
       resizeMode="cover"
     >
+      {/* Subtle dark overlay */}
+      <View style={styles.overlay} />
+
       <View style={styles.loginContainer}>
-        {/* Brand Section */}
-        <View style={styles.brandSection}></View>
+        {/* Brand Section - top spacer */}
+        <View style={styles.brandSection} />
 
         {/* Login Section */}
         <View style={styles.loginSection}>
@@ -144,19 +130,20 @@ export default function Login() {
             ]}
           >
             {displayedText}
+            <Text style={styles.cursor}>|</Text>
           </Animated.Text>
 
           {/* Google Sign-In Button */}
           <TouchableOpacity
             style={styles.googleButton}
             onPress={handleGoogleSignIn}
-            activeOpacity={0.7}
+            activeOpacity={0.85}
           >
             <FontAwesome5
               name="google"
               size={20}
               color="#1877F3"
-              style={{ marginHorizontal: 5 }}
+              style={{ marginRight: 10 }}
             />
             <Text style={styles.googleButtonText}>Continue with Google</Text>
           </TouchableOpacity>
@@ -169,3 +156,76 @@ export default function Login() {
     </ImageBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(9,21,86,0.35)",
+  },
+  loginContainer: {
+    flex: 1,
+  },
+  brandSection: {
+    marginTop: height * 0.12,
+  },
+  appName: {
+    fontSize: 17,
+    fontWeight: "600",
+    fontFamily: "JetBrainsMono-Medium",
+    color: "#ffffff",
+    letterSpacing: 0.5,
+    textAlign: "center",
+    marginBottom: 8,
+    paddingHorizontal: 20,
+    lineHeight: 26,
+    textShadowColor: "rgba(124,58,237,0.6)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 8,
+  },
+  cursor: {
+    color: "#c090f1",
+    fontWeight: "200",
+  },
+  loginSection: {
+    flex: 1,
+    width: "100%",
+    paddingHorizontal: 24,
+    paddingBottom: 72,
+    alignItems: "center",
+    justifyContent: "flex-end",
+  },
+  googleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ffffff",
+    paddingVertical: 16,
+    paddingHorizontal: 28,
+    borderRadius: 16,
+    marginBottom: 20,
+    marginTop: 40,
+    width: "100%",
+    maxWidth: 320,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  googleButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#091556",
+    letterSpacing: 0.3,
+  },
+  termsText: {
+    textAlign: "center",
+    fontSize: 12,
+    color: "rgba(255,255,255,0.65)",
+    maxWidth: 280,
+    lineHeight: 18,
+  },
+});

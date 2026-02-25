@@ -1,23 +1,24 @@
-<<<<<<< HEAD
-=======
 // constants/theme.ts
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 export const COLORS = {
   heart: "#FF5E7E",
   grey: "#a3a4a8ff",
   white: "#ffffffff",
-  primary: "#091556cc",
+  primary: "#091556",
   secondary: "#7c3aed",
   tertiary: "#1940bd",
+  gold: "#FFD700",
 };
 
 export const LIGHT_COLORS = {
-  primary: "#091556cc",
+  primary: "#091556",
   secondary: "#7c3aed",
-  background: "#ecececff",
+  accent: "#1940bd",
+  gold: "#FFD700",
+  background: "#f0f2faff",
   surface: "#ffffffff",
+  card: "#ffffff",
   text: "#1b3872ff",
-  text2:"#1b3872ff",
+  text2: "#1b3872ff",
   textSecondary: "#4A5568",
   border: "#E2E8F0",
   input: "#ffffffff",
@@ -30,21 +31,25 @@ export const LIGHT_COLORS = {
   subtext: "#718096",
   surfaceLight: "#E6F0FF",
   green: "#00C89E",
-  diagonalGradient: {
-    background: `linear-gradient(45deg, ${COLORS.primary}, ${COLORS.secondary}, ${COLORS.tertiary})`,
-  },
+  tabBar: "#ffffff",
+  tabBarBorder: "#E2E8F0",
+  divider: "#EDF2F7",
+  avatarBg: "#E6EAF7",
 };
 
 export const DARK_COLORS = {
-  primary: "#170957",
-  secondary: "#1940bd",
+  primary: "#3d5af1",
+  secondary: "#9b6dff",
+  accent: "#4a7fff",
+  gold: "#FFD700",
   background: "#0A0F2C",
-  surface: "#192046",
+  surface: "#141c40",
+  card: "#192046",
   text: "#F5F7FB",
-  text2:"#170957",
+  text2: "#ffffff",
   textSecondary: "#A0AEC0",
-  border: "#404564ff",
-  input: "#ffffffff",
+  border: "#2a3060",
+  input: "#1e2650",
   placeholder: "#4A5568",
   buttonText: "#FFFFFF",
   overlay: "rgba(0,0,0,0.7)",
@@ -54,10 +59,10 @@ export const DARK_COLORS = {
   subtext: "#CBD5E0",
   surfaceLight: "#2D3748",
   green: "#00C89E",
-
-  diagonalGradient: {
-    background: `linear-gradient(45deg, ${COLORS.primary}, ${COLORS.secondary}, ${COLORS.tertiary})`,
-  },
+  tabBar: "#0e1535",
+  tabBarBorder: "#2a3060",
+  divider: "#1e2650",
+  avatarBg: "#1e2650",
 };
 
-export type ThemeColors = typeof LIGHT_COLORS | typeof DARK_COLORS;
+export type ThemeColors = typeof LIGHT_COLORS;

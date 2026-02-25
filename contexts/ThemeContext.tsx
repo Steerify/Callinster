@@ -1,7 +1,7 @@
 // context/ThemeContext.tsx
-import React, { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DARK_COLORS, LIGHT_COLORS, ThemeColors } from "@/constants/theme";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { DARK_COLORS, LIGHT_COLORS, ThemeColors } from "../constants/theme";
 
 type ThemeType = "light" | "dark";
 

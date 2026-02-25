@@ -1,159 +1,142 @@
-import React, { useRef, useEffect } from "react";
-import {
-  Animated,
-  Dimensions,
-  FlatList,
-  Image,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { carouselStyles } from "../../styles/carousel.styles";
+import { useEffect, useRef, useState } from "react";
+import {
+    Animated,
+    Dimensions,
+    ImageBackground,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from "react-native";
+import { useTheme } from "../contexts/ThemeContext";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
+const CARD_WIDTH = width - 32;
 
 type CarouselItem = {
   key: string;
   title: string;
   subtitle: string;
-  action: () => void;
-  bgColor: string;
-  textColor: string;
-  icon: string;
-  bgImage?: any; // Only added this line
+  action?: () => void;
+  bgColor?: string;
+  textColor?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
+  bgImage?: any;
 };
 
-type CarouselProps = {
+interface CarouselProps {
   data: CarouselItem[];
-  interval?: number;
-};
+}
 
-export default function Carousel({ data, interval = 8000 }: CarouselProps) {
-  const carouselRef = useRef<FlatList>(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const currentIndexRef = useRef(0);
-  const timerRef = useRef<number | null>(null);
+export default function Carousel({ data }: CarouselProps) {
+  const { colors } = useTheme();
+  const scrollRef = useRef<ScrollView>(null);
+  const [current, setCurrent] = useState(0);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    if (data.length > 1) {
-      startAutoScroll();
-    }
-    return () => stopAutoScroll();
-  }, [data]);
-
-  const startAutoScroll = () => {
-    stopAutoScroll();
-    timerRef.current = setInterval(() => {
-      const nextIndex = (currentIndexRef.current + 1) % data.length;
-      carouselRef.current?.scrollToIndex({ index: nextIndex, animated: true });
-      currentIndexRef.current = nextIndex;
-    }, interval) as unknown as number;
-  };
-
-  const stopAutoScroll = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-  };
-
-  const handleScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-    {
-      useNativeDriver: false,
-      listener: (event: any) => {
-        const contentOffset = event.nativeEvent.contentOffset.x;
-        const index = Math.round(contentOffset / SCREEN_WIDTH);
-        currentIndexRef.current = index;
-      },
-    }
-  );
-
-  // Modified render function
-  const renderCarouselItem = ({ item, index }: { item: CarouselItem; index: number }) => (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      onPress={item.action}
-      style={[carouselStyles.itemContainer, { backgroundColor: item.bgColor }]}
-    >
-      {/* Only added this conditional background image */}
-      {index === 0 && item.bgImage && (
-        <Image 
-          source={item.bgImage} 
-          style={{
-            position: 'absolute',
-            width: 300,
-            height: '200%',
-            opacity: 0.7,
-             borderRadius: 70 ,
-          }}
-          resizeMode="cover"
-        />
-      )}
-      <View style={carouselStyles.itemContent}>
-        <Ionicons
-          name={item.icon as any}
-          size={28}
-          color={item.textColor}
-          style={carouselStyles.icon}
-        />
-        <View style={carouselStyles.textContainer}>
-          <Text style={[carouselStyles.title, { color: item.textColor }]}>
-            {item.title}
-          </Text>
-          <Text style={[carouselStyles.subtitle, { color: item.textColor }]}>
-            {item.subtitle}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-
-  // Unchanged pagination
-  const renderPagination = () => {
-    return (
-      <View style={carouselStyles.pagination}>
-        {data.map((_, index) => {
-          const opacity = scrollX.interpolate({
-            inputRange: [
-              (index - 1) * SCREEN_WIDTH,
-              index * SCREEN_WIDTH,
-              (index + 1) * SCREEN_WIDTH,
-            ],
-            outputRange: [0.3, 1, 0.3],
-            extrapolate: "clamp",
-          });
-
-          return (
-            <Animated.View
-              key={index}
-              style={[carouselStyles.dot, { opacity }]}
-            />
-          );
-        })}
-      </View>
-    );
-  };
+    if (data.length <= 1) return;
+    const interval = setInterval(() => {
+      const next = (current + 1) % data.length;
+      Animated.timing(fadeAnim, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
+        scrollRef.current?.scrollTo({ x: next * CARD_WIDTH, animated: false });
+        setCurrent(next);
+        Animated.timing(fadeAnim, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+      });
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [current, data.length]);
 
   return (
-    <View style={carouselStyles.carouselContainer}>
-      <FlatList
-        ref={carouselRef}
-        data={data}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.key}
-        renderItem={(props) => renderCarouselItem({ ...props, index: props.index })}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        onTouchStart={stopAutoScroll}
-        onTouchEnd={startAutoScroll}
-        onMomentumScrollEnd={() => {
-          startAutoScroll();
-        }}
-      />
-      {renderPagination()}
+    <View style={cStyles.wrapper}>
+      <Animated.View style={{ opacity: fadeAnim }}>
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onMomentumScrollEnd={e => {
+            const newIndex = Math.round(e.nativeEvent.contentOffset.x / CARD_WIDTH);
+            setCurrent(newIndex);
+          }}
+          style={{ width: CARD_WIDTH }}
+        >
+          {data.map(item => {
+            const CardContent = (
+              <View style={[cStyles.card, { backgroundColor: item.bgColor || colors.primary, width: CARD_WIDTH }]}>
+                <View style={cStyles.cardInner}>
+                  {item.icon && (
+                    <View style={[cStyles.iconBox, { backgroundColor: "rgba(255,255,255,0.18)" }]}>
+                      <Ionicons name={item.icon} size={24} color={item.textColor || "#fff"} />
+                    </View>
+                  )}
+                  <View style={{ flex: 1 }}>
+                    <Text style={[cStyles.title, { color: item.textColor || "#fff" }]} numberOfLines={1}>{item.title}</Text>
+                    <Text style={[cStyles.subtitle, { color: item.textColor ? `${item.textColor}CC` : "rgba(255,255,255,0.82)" }]} numberOfLines={3}>{item.subtitle}</Text>
+                  </View>
+                  {item.action && (
+                    <TouchableOpacity onPress={item.action} style={cStyles.actionBtn}>
+                      <Ionicons name="arrow-forward" size={16} color={item.textColor || "#fff"} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            );
+
+            if (item.bgImage) {
+              return (
+                <ImageBackground key={item.key} source={item.bgImage} style={[cStyles.card, { width: CARD_WIDTH }]} imageStyle={{ borderRadius: 16, opacity: 0.55 }} resizeMode="cover">
+                  <View style={cStyles.bgOverlay} />
+                  <View style={cStyles.cardInner}>
+                    {item.icon && (
+                      <View style={[cStyles.iconBox, { backgroundColor: "rgba(255,255,255,0.18)" }]}>
+                        <Ionicons name={item.icon} size={24} color={item.textColor || "#fff"} />
+                      </View>
+                    )}
+                    <View style={{ flex: 1 }}>
+                      <Text style={[cStyles.title, { color: item.textColor || "#fff" }]} numberOfLines={1}>{item.title}</Text>
+                      <Text style={[cStyles.subtitle, { color: "rgba(255,255,255,0.85)" }]} numberOfLines={3}>{item.subtitle}</Text>
+                    </View>
+                    {item.action && (
+                      <TouchableOpacity onPress={item.action} style={cStyles.actionBtn}>
+                        <Ionicons name="arrow-forward" size={16} color="#fff" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </ImageBackground>
+              );
+            }
+            return <View key={item.key}>{CardContent}</View>;
+          })}
+        </ScrollView>
+      </Animated.View>
+
+      {/* Dot indicators */}
+      {data.length > 1 && (
+        <View style={cStyles.dots}>
+          {data.map((_, i) => (
+            <TouchableOpacity key={i} onPress={() => { scrollRef.current?.scrollTo({ x: i * CARD_WIDTH, animated: true }); setCurrent(i); }}>
+              <View style={[cStyles.dot, { backgroundColor: i === current ? colors.primary : "#D1D5DB", width: i === current ? 18 : 6 }]} />
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
+
+const cStyles = StyleSheet.create({
+  wrapper: { marginHorizontal: 16, marginBottom: 12 },
+  card: { borderRadius: 16, overflow: "hidden", minHeight: 90 },
+  cardInner: { flexDirection: "row", alignItems: "center", padding: 16, gap: 12 },
+  bgOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(9,21,86,0.45)", borderRadius: 16 },
+  iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  title: { fontSize: 14, fontWeight: "700", marginBottom: 4 },
+  subtitle: { fontSize: 12, lineHeight: 18 },
+  actionBtn: { padding: 8, backgroundColor: "rgba(255,255,255,0.18)", borderRadius: 8 },
+  dots: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: 8, gap: 4 },
+  dot: { height: 6, borderRadius: 3 },
+});

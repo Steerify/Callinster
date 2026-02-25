@@ -1,44 +1,23 @@
-<<<<<<< HEAD
-import { COLORS } from "../../constants/theme";
-import { styles } from "../../styles/feed.styles";
-=======
-import { COLORS } from "@/constants/theme";
-import { styles } from "@/styles/feed.styles";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-<<<<<<< HEAD
-=======
-  FlatList,
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
-  Image,
-  Linking,
-  RefreshControl,
-  SafeAreaView,
-<<<<<<< HEAD
-  Text,
-  TouchableOpacity,
-  View,
-  FlatList,
-  ScrollView
+    FlatList,
+    Image,
+    Linking,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { useTheme } from "../contexts/ThemeContext";
-import Contact from "../components/Contact";
-import { useSubscription } from "../components/Subsceiption";
-import Carousel from "../components/Carousel"; 
-=======
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import Carousel from "../../components/Carousel"; // Import the new Carousel component
+import Carousel from "../../components/Carousel";
 import Contact from "../../components/Contact";
 import { useSubscription } from "../../components/Subsceiption";
+import { COLORS } from "../../constants/theme";
 import { useTheme } from "../../contexts/ThemeContext";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 
 type MyContact = {
   id: string;
@@ -52,31 +31,23 @@ export default function Notifications() {
   const { tier } = useSubscription();
   const [showPlanDetails, setShowPlanDetails] = useState(false);
   const { colors } = useTheme();
-  const [showSubModal, setShowSubModal] = useState(false);
+
+  const isElite = tier === "elite";
+  const isPremium = tier === "premium";
 
   const loadFavorites = useCallback(() => {
-<<<<<<< HEAD
-    AsyncStorage.getItem("favoriteContacts").then((data) => {
-=======
     AsyncStorage.getItem("favoriteContacts").then(data => {
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
       if (data) setFavorites(JSON.parse(data));
       else setFavorites([]);
     });
   }, []);
 
   useEffect(() => {
-    if (tier === "elite") {
-      loadFavorites();
-    }
-  }, [tier, loadFavorites]);
+    if (isElite) loadFavorites();
+  }, [isElite, loadFavorites]);
 
   const handleRemoveFavorite = async (contactId: string) => {
-<<<<<<< HEAD
-    const updated = favorites.filter((c) => c.id !== contactId);
-=======
     const updated = favorites.filter(c => c.id !== contactId);
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
     setFavorites(updated);
     await AsyncStorage.setItem("favoriteContacts", JSON.stringify(updated));
   };
@@ -87,396 +58,174 @@ export default function Notifications() {
     setTimeout(() => setRefreshing(false), 500);
   };
 
-  const isElite = tier === "elite";
-
-  // Enhanced carousel data with better styling
   const carouselData = [
     {
       key: "feedback",
-      title: "⭐ Enjoying the app?",
-      subtitle: "Give us feedback on Play Store!",
-      action: () =>
-        Linking.openURL(
-          "https://play.google.com/store/apps/details?id=your.app.id"
-        ),
-      bgColor: "#f0f7ff",
-      textColor: "#0066cc",
+      title: "⭐ Enjoying Callinster?",
+      subtitle: "Rate us on the Play Store!",
+      action: () => Linking.openURL("https://play.google.com/store/apps/details?id=your.app.id"),
+      bgColor: "#eef2ff",
+      textColor: "#091556",
       icon: "thumbs-up",
     },
     {
       key: "quote1",
       title: "Inspiration",
-      subtitle:
-        "The best way to get started is to quit talking and begin doing. – Walt Disney",
-      bgColor: "#fff0f3",
-      textColor: "#d6336c",
+      subtitle: "The best way to get started is to quit talking and begin doing. – Walt Disney",
+      bgColor: "#f5f0ff",
+      textColor: "#7c3aed",
       icon: "bulb",
     },
     {
       key: "quote2",
       title: "Motivation",
-      subtitle:
-        "Success is not final, failure is not fatal: It is the courage to continue that counts. – Winston Churchill",
-      bgColor: "#f0fff4",
-      textColor: "#2b8a3e",
+      subtitle: "Success is not final, failure is not fatal: It is the courage to continue that counts. – Churchill",
+      bgColor: "#fffbea",
+      textColor: "#b45309",
       icon: "rocket",
     },
-    ...(!isElite
-      ? [
-          {
-            key: "ad",
-            title: "Upgrade to Elite",
-            subtitle: "Unlock all premium features!",
-            bgColor: "#fff8e6",
-            textColor: "#e67700",
-            icon: "star",
-          },
-        ]
-      : []),
+    ...(!isElite ? [{
+      key: "ad",
+      title: "🏆 Upgrade to Elite",
+      subtitle: "Unlock unlimited favorites, no ads & more!",
+      bgColor: "#fff7ed",
+      textColor: "#ea580c",
+      icon: "star",
+    }] : []),
   ];
 
-<<<<<<< HEAD
-  // If not elite tier, show upgrade screen
-=======
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
-  if (tier !== "elite") {
-    const isPremium = tier === "premium";
-    return (
-      <View style={styles.modalContainer}>
-        <Carousel data={carouselData} />
+  const weeklyPreferencesDefault = {
+    monday: { calls: false, messages: false },
+    tuesday: { calls: false, messages: false },
+    wednesday: { calls: false, messages: false },
+    thursday: { calls: false, messages: false },
+    friday: { calls: false, messages: false },
+    saturday: { calls: false, messages: false },
+    sunday: { calls: false, messages: false },
+  };
 
-        <View
-          style={[
-            styles.modalContent,
-            {
-              flexDirection: "row",
-              alignItems: "center",
-              padding: 0,
-              backgroundColor: isPremium ? "#f5f0ff" : "#f0f7ff",
-              borderRadius: 20,
-              shadowColor: "#000",
-              shadowOpacity: 0.15,
-              shadowRadius: 12,
-              elevation: 6,
-            },
-          ]}
-        >
-          {/* Left: Illustration */}
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-              borderTopLeftRadius: 16,
-              borderBottomLeftRadius: 16,
-              padding: 20,
-            }}
-          >
-            <Image
-              source={
-                isPremium
-                  ? require("../../assets/images/elite-trophy.png")
-                  : require("../../assets/images/splash-icon.png")
-              }
-              style={{
-                width: isPremium ? 110 : 110,
-                height: isPremium ? 260 : 110,
-                marginBottom: 10,
-                transform: [{ scale: 1.08 }],
-                shadowColor: "#e67700",
-                shadowOpacity: 0.4,
-                shadowRadius: 16,
-              }}
-              resizeMode="contain"
-            />
-          </View>
-          {/* Right: Text and actions */}
-          <View style={{ flex: 2, padding: 20 }}>
-            <Text
-              style={{
-                fontWeight: "bold",
-                fontSize: 20,
-                color: isPremium ? "#7c3aed" : colors.primary,
-                marginBottom: 8,
-              }}
-            >
-              {isPremium
-                ? "Elite Awaits You! 🏆"
-                : "Upgrade Your Callinster Experience 🥇✨"}
-            </Text>
-            <Text style={{ fontSize: 15, color: "#444", marginBottom: 12 }}>
-              {isPremium
-                ? "Unlock the ultimate Callinster experience with Elite! Enjoy unlimited favorites, exclusive features, and a distraction-free app."
-                : "Upgrade to Premium or Elite for more amazing features and a smoother experience!"}
-            </Text>
-            <View style={{ marginBottom: 10 }}>
-              <Text
-                style={{ color: "#222", fontWeight: "bold", marginBottom: 4 }}
-              >
-                Elite Benefits:
-              </Text>
-              <Text style={{ color: "#444" }}>• Unlimited favorites</Text>
-              <Text style={{ color: "#444" }}>• Unlimited deletes</Text>
-              <Text style={{ color: "#444" }}>• Motivational carousel</Text>
-              <Text style={{ color: "#444" }}>• No ads or upgrade prompts</Text>
-              <Text style={{ color: "#444" }}>• Advanced search & more!</Text>
-            </View>
-            <TouchableOpacity
-              style={{
-                backgroundColor: isPremium ? "#7c3aed" : colors.primary,
-                borderRadius: 8,
-                paddingVertical: 12,
-                paddingHorizontal: 24,
-                alignSelf: "flex-start",
-                marginBottom: 10,
-                shadowColor: "#7c3aed",
-                shadowOpacity: 0.3,
-                shadowRadius: 8,
-                elevation: 4,
-              }}
-              onPress={() => setShowPlanDetails(true)}
-              activeOpacity={0.85}
-            >
-              <Text
-                style={{ color: "white", fontWeight: "bold", fontSize: 16 }}
-              >
-                Upgrade to Elite
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                marginTop: 4,
-                alignSelf: "flex-start",
-                padding: 6,
-              }}
-              onPress={() => setShowPlanDetails(true)}
-            >
-              <Text style={{ color: "#7c3aed", fontWeight: "bold" }}>
-                See All Plans
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    );
-  }
-
-<<<<<<< HEAD
-  // For elite tier - use ScrollView with RefreshControl when list is empty
-  if (favorites.length === 0) {
+  // Non-elite: show upgrade prompt
+  if (!isElite) {
     return (
-      <ScrollView
-        style={[styles.container, { backgroundColor: colors.background }]}
-        contentContainerStyle={{ flex: 1 }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={["#6200EE", "#3700B3", "#03DAC6"]}
-          />
-        }
-      >
-        <SafeAreaView style={styles.header}>
-          <View
-            style={{ flexDirection: "row", alignItems: "center", marginTop: 20 }}
-=======
-  if (favorites.length === 0) {
-    return (
-      <View
-        style={[
-          styles.container,
-          {
-            flex: 1,
-            backgroundColor: colors.background,
-          },
-        ]}
-      >
-        <SafeAreaView style={styles.header}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 20,
-            }}
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
-          >
-            <Image
-              source={require("../../assets/images/splash-icon.png")}
-              style={{ width: 30, height: 25, marginRight: 3, marginTop: 3 }}
-              resizeMode="contain"
-            />
-            <Text style={[styles.appName, { color: colors.text }]}>
-              Favorites
-            </Text>
-<<<<<<< HEAD
-            <TouchableOpacity
-              style={{
-                borderRadius: 20,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Ionicons name="log-out-outline" size={24} color={COLORS.grey} />
-            </TouchableOpacity>
-          </View>
+      <View style={[nStyles.screen, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={nStyles.header}>
+          <Image source={require("../../assets/images/splash-icon.png")} style={nStyles.headerIcon} resizeMode="contain" />
+          <Text style={[nStyles.headerTitle, { color: colors.text }]}>Favorites</Text>
         </SafeAreaView>
 
-        <Carousel data={carouselData} />
-
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: colors.text, fontSize: 16, marginBottom: 6 }}>
-            No favorite contacts yet.
-          </Text>
-          <Text style={{ color: colors.text, fontSize: 14, textAlign: 'center', paddingHorizontal: 40 }}>
-            Pull down to refresh 
-          </Text>
-        </View>
-      </ScrollView>
-    );
-  }
-
-  // For elite tier with favorites - use FlatList as before
-=======
-          </View>
-        </SafeAreaView>
-
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={["#6200EE", "#3700B3", "#03DAC6"]}
-            />
-          }
-        >
+        <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
           <Carousel data={carouselData} />
 
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            {/* Heart Icon */}
-            <View style={{ marginBottom: 20 ,marginTop: -100}}>
-              <Ionicons name="heart" size={64} color={colors.text} />
+          {/* Upgrade Prompt */}
+          <View style={[nStyles.upgradeCard, { backgroundColor: isPremium ? "#f5f0ff" : "#eef2ff", borderColor: isPremium ? "#7c3aed" : colors.primary }]}>
+            <View style={nStyles.upgradeIllustration}>
+              <Image
+                source={isPremium ? require("../../assets/images/elite-trophy.png") : require("../../assets/images/splash-icon.png")}
+                style={{ width: 90, height: isPremium ? 200 : 90 }}
+                resizeMode="contain"
+              />
             </View>
-
-            <Text
-              style={{
-                textAlign: "center",
-                color: colors.text,
-                fontSize: 16,
-                marginVertical: 10,
-              }}
-            >
-              No favorite contacts yet.
-            </Text>
+            <View style={nStyles.upgradeContent}>
+              <Text style={[nStyles.upgradeTitle, { color: isPremium ? "#7c3aed" : colors.primary }]}>
+                {isPremium ? "Elite Awaits You! 🏆" : "Upgrade Your Experience ✨"}
+              </Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 12, lineHeight: 19 }}>
+                {isPremium
+                  ? "Get unlimited favorites, exclusive features, and a truly distraction-free app."
+                  : "Upgrade to Premium or Elite for amazing features and a smoother experience!"}
+              </Text>
+              {["Unlimited favorites", "Unlimited deletes", "No ads or prompts", "Advanced search"].map(f => (
+                <View key={f} style={{ flexDirection: "row", alignItems: "center", marginBottom: 3 }}>
+                  <Ionicons name="checkmark-circle" size={14} color={isPremium ? "#7c3aed" : colors.primary} />
+                  <Text style={{ color: colors.textSecondary, fontSize: 13, marginLeft: 6 }}>{f}</Text>
+                </View>
+              ))}
+              <TouchableOpacity
+                style={[nStyles.upgradeBtn, { backgroundColor: isPremium ? "#7c3aed" : colors.primary }]}
+                onPress={() => setShowPlanDetails(true)}
+              >
+                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 14 }}>
+                  {isPremium ? "Upgrade to Elite" : "See Plans"}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </View>
     );
   }
 
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
-  return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <SafeAreaView style={styles.header}>
-        <View
-          style={{ flexDirection: "row", alignItems: "center", marginTop: 20 }}
+  // Elite with no favorites yet
+  if (favorites.length === 0) {
+    return (
+      <View style={[nStyles.screen, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={nStyles.header}>
+          <Image source={require("../../assets/images/splash-icon.png")} style={nStyles.headerIcon} resizeMode="contain" />
+          <Text style={[nStyles.headerTitle, { color: colors.text }]}>Favorites</Text>
+        </SafeAreaView>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary, colors.secondary]} />}
         >
-          <Image
-            source={require("../../assets/images/splash-icon.png")}
-            style={{ width: 30, height: 25, marginRight: 3, marginTop: 3 }}
-            resizeMode="contain"
-          />
-          <Text style={[styles.appName, { color: colors.text }]}>
-            Favorites
-          </Text>
-          <TouchableOpacity
-            style={{
-              borderRadius: 20,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Ionicons name="log-out-outline" size={24} color={COLORS.grey} />
-          </TouchableOpacity>
+          <Carousel data={carouselData} />
+          <View style={nStyles.emptyState}>
+            <View style={[nStyles.emptyIconWrap, { backgroundColor: `${COLORS.heart}15` }]}>
+              <Ionicons name="heart" size={52} color={COLORS.heart} />
+            </View>
+            <Text style={[nStyles.emptyTitle, { color: colors.text }]}>No favorites yet</Text>
+            <Text style={[nStyles.emptySubtitle, { color: colors.subtext }]}>
+              Tap the ♥ icon on any contact in the Home tab to add them here.
+            </Text>
+            <Text style={{ color: colors.placeholder, fontSize: 13, marginTop: 8 }}>Pull to refresh</Text>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
+
+  // Elite with favorites
+  return (
+    <View style={[nStyles.screen, { backgroundColor: colors.background }]}>
+      <SafeAreaView style={nStyles.header}>
+        <Image source={require("../../assets/images/splash-icon.png")} style={nStyles.headerIcon} resizeMode="contain" />
+        <Text style={[nStyles.headerTitle, { color: colors.text }]}>Favorites</Text>
+        <View style={[nStyles.countPill, { backgroundColor: `${COLORS.heart}18` }]}>
+          <Text style={{ color: COLORS.heart, fontWeight: "700", fontSize: 12 }}>{favorites.length}</Text>
         </View>
       </SafeAreaView>
-
-<<<<<<< HEAD
-=======
-      {/* Use the new Carousel component */}
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
       <Carousel data={carouselData} />
-
-      {/* Favorites List */}
       <FlatList
         data={favorites}
-<<<<<<< HEAD
-        keyExtractor={(item) => item.id}
-=======
         keyExtractor={item => item.id}
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
-        style={{ marginBottom: 50 }}
+        style={{ marginBottom: 80, paddingHorizontal: 4 }}
+        contentContainerStyle={{ paddingVertical: 4 }}
         renderItem={({ item }) => (
           <Contact
             contact={item}
             showHeart={false}
             onDelete={() => handleRemoveFavorite(item.id)}
-            weeklyPreferences={{
-<<<<<<< HEAD
-              monday: { calls: false, messages: false },
-              tuesday: { calls: false, messages: false },
-              wednesday: { calls: false, messages: false },
-              thursday: { calls: false, messages: false },
-              friday: { calls: false, messages: false },
-              saturday: { calls: false, messages: false },
-              sunday: { calls: false, messages: false },
-=======
-              monday: {
-                calls: false,
-                messages: false,
-              },
-              tuesday: {
-                calls: false,
-                messages: false,
-              },
-              wednesday: {
-                calls: false,
-                messages: false,
-              },
-              thursday: {
-                calls: false,
-                messages: false,
-              },
-              friday: {
-                calls: false,
-                messages: false,
-              },
-              saturday: {
-                calls: false,
-                messages: false,
-              },
-              sunday: {
-                calls: false,
-                messages: false,
-              },
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
-            }}
+            weeklyPreferences={weeklyPreferencesDefault}
           />
         )}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={["#6200EE", "#3700B3", "#03DAC6"]}
-          />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
       />
     </View>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
+
+const nStyles = StyleSheet.create({
+  screen: { flex: 1 },
+  header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 20, paddingBottom: 10 },
+  headerIcon: { width: 28, height: 28, marginRight: 8 },
+  headerTitle: { fontSize: 20, fontWeight: "700", flex: 1 },
+  countPill: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
+  upgradeCard: { margin: 16, borderRadius: 16, borderWidth: 1.5, flexDirection: "row", overflow: "hidden" },
+  upgradeIllustration: { flex: 1, alignItems: "center", justifyContent: "center", padding: 16 },
+  upgradeContent: { flex: 2, padding: 16 },
+  upgradeTitle: { fontSize: 16, fontWeight: "700", marginBottom: 8 },
+  upgradeBtn: { borderRadius: 10, paddingVertical: 10, alignItems: "center", marginTop: 12 },
+  emptyState: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 40, paddingTop: 40 },
+  emptyIconWrap: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center", marginBottom: 20 },
+  emptyTitle: { fontSize: 20, fontWeight: "700", marginBottom: 8 },
+  emptySubtitle: { fontSize: 14, textAlign: "center", lineHeight: 20 },
+});

@@ -1,49 +1,55 @@
-import React from "react";
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { Ionicons } from "@expo/vector-icons";
-<<<<<<< HEAD
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Platform, StyleSheet, View } from "react-native";
 import { COLORS } from "../../constants/theme";
-import Index from "./index";
-import Notifications from "./notifications";
-import Profile from "./profile";
 import { useTheme } from "../contexts/ThemeContext";
-=======
-import { COLORS } from "@/constants/theme";
 import Index from "./index";
 import Notifications from "./notifications";
 import Profile from "./profile";
-import { useTheme } from "../../contexts/ThemeContext";
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
 
-const Tab = createMaterialTopTabNavigator();
+const Tab = createBottomTabNavigator();
 
 export default function TabLayout() {
   const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarShowLabel: false,
+        headerShown: false,
+        tabBarShowLabel: true,
         tabBarActiveTintColor: colors.primary,
-        tabBarStyle: {
-          height: 50,
-          backgroundColor: "white",
-          paddingBottom: 8,
-          elevation: 0,
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          borderTopWidth: 0, 
+        tabBarInactiveTintColor: colors.subtext,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "600",
+          marginBottom: Platform.OS === "android" ? 4 : 0,
         },
-        swipeEnabled: true, 
+        tabBarStyle: {
+          height: Platform.OS === "android" ? 62 : 80,
+          backgroundColor: colors.tabBar,
+          borderTopWidth: 1,
+          borderTopColor: colors.tabBarBorder,
+          paddingBottom: Platform.OS === "android" ? 8 : 24,
+          paddingTop: 6,
+          elevation: 10,
+          shadowColor: "#091556",
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+        },
+        tabBarIconStyle: {
+          marginTop: 2,
+        },
       }}
     >
       <Tab.Screen
         name="index"
         component={Index}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="home" size={24} color={color} />
+          tabBarLabel: "Home",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
+              <Ionicons name={focused ? "home" : "home-outline"} size={22} color={color} />
+            </View>
           ),
         }}
       />
@@ -51,24 +57,47 @@ export default function TabLayout() {
         name="notifications"
         component={Notifications}
         options={{
+          tabBarLabel: "Favorites",
           tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="heart"
-              size={24}
-              color={focused ? COLORS.heart : COLORS.grey}
-            />
+            <View style={[styles.iconWrap, focused && styles.iconWrapHeart]}>
+              <Ionicons
+                name={focused ? "heart" : "heart-outline"}
+                size={22}
+                color={focused ? COLORS.heart : COLORS.grey}
+              />
+            </View>
           ),
+          tabBarActiveTintColor: COLORS.heart,
         }}
       />
       <Tab.Screen
         name="profile"
         component={Profile}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="person" size={24} color={color} />
+          tabBarLabel: "Profile",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
+              <Ionicons name={focused ? "person" : "person-outline"} size={22} color={color} />
+            </View>
           ),
         }}
       />
     </Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  iconWrap: {
+    width: 36,
+    height: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+  },
+  iconWrapActive: {
+    backgroundColor: "rgba(9,21,86,0.1)",
+  },
+  iconWrapHeart: {
+    backgroundColor: "rgba(255,94,126,0.1)",
+  },
+});

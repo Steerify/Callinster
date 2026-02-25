@@ -1,26 +1,26 @@
-import { COLORS } from "../../constants/theme";
 import {
-  Entypo,
-  Feather,
-  FontAwesome,
-  FontAwesome5,
-  Ionicons,
+    Entypo,
+    Feather,
+    FontAwesome,
+    FontAwesome5,
+    Ionicons,
 } from "@expo/vector-icons";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Linking from "expo-linking";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import {
-  Alert,
-  Animated,
-  LayoutAnimation,
-  Modal,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Animated,
+    LayoutAnimation,
+    Modal,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
+import { COLORS } from "../../constants/theme";
 import { useTheme } from "../contexts/ThemeContext";
 
 type MyContact = {
@@ -35,20 +35,12 @@ type MyContact = {
   linkedinUsername?: string;
 };
 
-type DayPreference = {
-  calls: boolean;
-  messages: boolean;
+type DayPreference = { calls: boolean; messages: boolean };
+type WeeklyPreferences = {
+  monday: DayPreference; tuesday: DayPreference; wednesday: DayPreference;
+  thursday: DayPreference; friday: DayPreference; saturday: DayPreference; sunday: DayPreference;
 };
 
-type WeeklyPreferences = {
-  monday: DayPreference;
-  tuesday: DayPreference;
-  wednesday: DayPreference;
-  thursday: DayPreference;
-  friday: DayPreference;
-  saturday: DayPreference;
-  sunday: DayPreference;
-};
 interface ContactProps {
   contact: MyContact;
   onDelete: () => void;
@@ -57,230 +49,46 @@ interface ContactProps {
   weeklyPreferences: WeeklyPreferences;
 }
 
+const AVATAR_PALETTE = [
+  "#7c3aed","#091556","#1940bd","#0ea5e9","#10b981",
+  "#f59e0b","#ef4444","#8b5cf6","#06b6d4","#ec4899",
+];
+function getAvatarColor(name: string): string {
+  return AVATAR_PALETTE[name.charCodeAt(0) % AVATAR_PALETTE.length];
+}
+
 const PLATFORM_ICONS: Record<string, React.ReactNode> = {
-  Call: (
-    <Ionicons
-      name="call"
-      size={20}
-      color="#48BB78"
-      style={{ marginRight: 10 }}
-    />
-  ),
-  WhatsApp: (
-    <FontAwesome
-      name="whatsapp"
-      size={20}
-      color="#25D366"
-      style={{ marginRight: 10 }}
-    />
-  ),
-  Telegram: (
-    <FontAwesome
-      name="telegram"
-      size={20}
-      color="#229ED9"
-      style={{ marginRight: 10 }}
-    />
-  ),
-  Facebook: (
-    <FontAwesome
-      name="facebook"
-      size={20}
-      color="#1877F3"
-      style={{ marginRight: 10 }}
-    />
-  ),
-  Instagram: (
-    <Entypo
-      name="instagram"
-      size={20}
-      color="#C13584"
-      style={{ marginRight: 10 }}
-    />
-  ),
-  Snapchat: (
-    <FontAwesome5
-      name="snapchat-ghost"
-      size={20}
-      color="#FFFC00"
-      style={{ marginRight: 10 }}
-    />
-  ),
-  TikTok: (
-    <FontAwesome5
-      name="tiktok"
-      size={20}
-      color={COLORS.grey}
-      style={{ marginRight: 10 }}
-    />
-  ),
-  YouTube: (
-    <Feather
-      name="youtube"
-      size={20}
-      color="#FF0000"
-      style={{ marginRight: 10 }}
-    />
-  ),
-  LinkedIn: (
-    <Feather
-      name="linkedin"
-      size={20}
-      color="#0077B5"
-      style={{ marginRight: 10 }}
-    />
-  ),
+  Call: <Ionicons name="call" size={20} color="#48BB78" style={{ marginRight: 10 }} />,
+  WhatsApp: <FontAwesome name="whatsapp" size={20} color="#25D366" style={{ marginRight: 10 }} />,
+  Telegram: <FontAwesome name="telegram" size={20} color="#229ED9" style={{ marginRight: 10 }} />,
+  Facebook: <FontAwesome name="facebook" size={20} color="#1877F3" style={{ marginRight: 10 }} />,
+  Instagram: <Entypo name="instagram" size={20} color="#C13584" style={{ marginRight: 10 }} />,
+  Snapchat: <FontAwesome5 name="snapchat-ghost" size={20} color="#FFCC00" style={{ marginRight: 10 }} />,
+  TikTok: <FontAwesome5 name="tiktok" size={20} color="#010101" style={{ marginRight: 10 }} />,
+  YouTube: <Feather name="youtube" size={20} color="#FF0000" style={{ marginRight: 10 }} />,
+  LinkedIn: <Feather name="linkedin" size={20} color="#0077B5" style={{ marginRight: 10 }} />,
 };
 
 function sanitizeUsername(username: string) {
   return username.replace(/[^a-zA-Z0-9._-]/g, "");
 }
 
-export default function Contact({
-  contact,
-  onDelete,
-  showHeart = false,
-  onFavorite,
-  weeklyPreferences,
-}: ContactProps) {
+export default function Contact({ contact, onDelete, showHeart = false, onFavorite, weeklyPreferences }: ContactProps) {
   const { colors } = useTheme();
   const [isFavorite, setIsFavorite] = useState(false);
   const [connectModalVisible, setConnectModalVisible] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
-  const [heightAnim] = useState(new Animated.Value(0));
-  const [editUsernameModal, setEditUsernameModal] = useState<null | {
-    platform: string;
-    field: string;
-  }>(null);
+  const [editUsernameModal, setEditUsernameModal] = useState<null | { platform: string; field: string }>(null);
   const [usernameInput, setUsernameInput] = useState("");
   const [usernameError, setUsernameError] = useState("");
-  const days = [
-    "sunday",
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-  ];
+
+  const avatarColor = getAvatarColor(contact.name);
+  const days = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
   const today = days[new Date().getDay()];
-  const todayPrefs = weeklyPreferences[today as keyof WeeklyPreferences];
   const getCurrentDayPreferences = () => {
-    const day = new Date()
-      .toLocaleDateString("en-US", {
-        weekday: "long",
-      })
-      .toLowerCase() as keyof WeeklyPreferences;
+    const day = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase() as keyof WeeklyPreferences;
     return weeklyPreferences?.[day] || { calls: true, messages: true };
-  };
-
-  const openSocialMedia = async (platform: string, phoneNumber: string) => {
-    const dayPrefs = getCurrentDayPreferences();
-    const isCallPlatform = platform === "Call" || platform === "phone";
-
-    if (isCallPlatform && !dayPrefs.calls) {
-      Alert.alert("Not Allowed", "Calls are not allowed for today");
-      return;
-    }
-
-    if (!isCallPlatform && !dayPrefs.messages) {
-      Alert.alert("Not Allowed", "Messages are not allowed for today");
-      return;
-    }
-
-    const number = phoneNumber.replace(/\D/g, "");
-    let url = "";
-
-    switch (platform) {
-      case "Call":
-        url = `tel:${number}`;
-        break;
-      case "WhatsApp":
-        url = `https://wa.me/${formatPhoneNumber(phoneNumber)}`;
-        break;
-      case "Telegram":
-        url = `https://t.me/${formatPhoneNumber(phoneNumber)}`;
-        break;
-      case "Facebook":
-        if (contact.facebookUsername) {
-          url = `fb://profile/${sanitizeUsername(contact.facebookUsername)}`;
-        } else {
-          setEditUsernameModal({
-            platform: "Facebook",
-            field: "facebookUsername",
-          });
-          return;
-        }
-        break;
-      case "Instagram":
-        if (contact.instagramUsername) {
-          url = `instagram://user?username=${sanitizeUsername(
-            contact.instagramUsername
-          )}`;
-        } else {
-          setEditUsernameModal({
-            platform: "Instagram",
-            field: "instagramUsername",
-          });
-          return;
-        }
-        break;
-      case "Snapchat":
-        if (contact.snapchatUsername) {
-          url = `snapchat://add/${sanitizeUsername(contact.snapchatUsername)}`;
-        } else {
-          setEditUsernameModal({
-            platform: "Snapchat",
-            field: "snapchatUsername",
-          });
-          return;
-        }
-        break;
-      case "TikTok":
-        if (contact.tiktokUsername) {
-          url = `https://www.tiktok.com/@${sanitizeUsername(
-            contact.tiktokUsername
-          )}`;
-        } else {
-          setEditUsernameModal({
-            platform: "TikTok",
-            field: "tiktokUsername",
-          });
-          return;
-        }
-        break;
-      case "YouTube":
-        if (contact.youtubeUsername) {
-          url = `https://www.youtube.com/${sanitizeUsername(
-            contact.youtubeUsername
-          )}`;
-        } else {
-          setEditUsernameModal({
-            platform: "YouTube",
-            field: "youtubeUsername",
-          });
-          return;
-        }
-        break;
-      case "LinkedIn":
-        if (contact.linkedinUsername) {
-          url = `https://www.linkedin.com/in/${sanitizeUsername(
-            contact.linkedinUsername
-          )}`;
-        } else {
-          setEditUsernameModal({
-            platform: "LinkedIn",
-            field: "linkedinUsername",
-          });
-          return;
-        }
-        break;
-      default:
-        return;
-    }
-    Linking.openURL(url);
-    setConnectModalVisible(false);
   };
 
   useEffect(() => {
@@ -292,17 +100,13 @@ export default function Contact({
         }
       });
     }
-
     const loadUsernames = async () => {
       const key = `usernames_${contact.id}`;
       const saved = await AsyncStorage.getItem(key);
-      if (saved) {
-        const usernames = JSON.parse(saved);
-        Object.assign(contact, usernames);
-      }
+      if (saved) Object.assign(contact, JSON.parse(saved));
     };
     loadUsernames();
-  }, [contact, contact.id, showHeart]);
+  }, [contact, showHeart]);
 
   const toggleExpand = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -312,11 +116,8 @@ export default function Contact({
   const handleFavorite = async () => {
     const data = await AsyncStorage.getItem("favoriteContacts");
     let favs: any[] = data ? JSON.parse(data) : [];
-    if (isFavorite) {
-      favs = favs.filter(fav => fav.id !== contact.id);
-    } else {
-      favs.push(contact);
-    }
+    if (isFavorite) favs = favs.filter(fav => fav.id !== contact.id);
+    else favs.push(contact);
     await AsyncStorage.setItem("favoriteContacts", JSON.stringify(favs));
     setIsFavorite(!isFavorite);
     if (onFavorite) onFavorite(contact);
@@ -324,358 +125,190 @@ export default function Contact({
 
   function formatPhoneNumber(number: string) {
     let num = number.replace(/\D/g, "");
-    if (num.startsWith("0")) {
-      num = "+234" + num.slice(1);
-    } else if (!num.startsWith("+")) {
-      num = "+" + num;
-    }
+    if (num.startsWith("0")) num = "+234" + num.slice(1);
+    else if (!num.startsWith("+")) num = "+" + num;
     return num;
   }
 
+  const openSocialMedia = async (platform: string, phoneNumber: string) => {
+    const dayPrefs = getCurrentDayPreferences();
+    const isCallPlatform = platform === "Call" || platform === "phone";
+    if (isCallPlatform && !dayPrefs.calls) { Alert.alert("Not Allowed", "Calls are not enabled for today."); return; }
+    if (!isCallPlatform && !dayPrefs.messages) { Alert.alert("Not Allowed", "Messages are not enabled for today."); return; }
+
+    const number = phoneNumber.replace(/\D/g, "");
+    let url = "";
+    switch (platform) {
+      case "Call": url = `tel:${number}`; break;
+      case "WhatsApp": url = `https://wa.me/${formatPhoneNumber(phoneNumber)}`; break;
+      case "Telegram": url = `https://t.me/${formatPhoneNumber(phoneNumber)}`; break;
+      case "Facebook":
+        if (contact.facebookUsername) url = `fb://profile/${sanitizeUsername(contact.facebookUsername)}`;
+        else { setEditUsernameModal({ platform: "Facebook", field: "facebookUsername" }); return; }
+        break;
+      case "Instagram":
+        if (contact.instagramUsername) url = `instagram://user?username=${sanitizeUsername(contact.instagramUsername)}`;
+        else { setEditUsernameModal({ platform: "Instagram", field: "instagramUsername" }); return; }
+        break;
+      case "Snapchat":
+        if (contact.snapchatUsername) url = `snapchat://add/${sanitizeUsername(contact.snapchatUsername)}`;
+        else { setEditUsernameModal({ platform: "Snapchat", field: "snapchatUsername" }); return; }
+        break;
+      case "TikTok":
+        if (contact.tiktokUsername) url = `https://www.tiktok.com/@${sanitizeUsername(contact.tiktokUsername)}`;
+        else { setEditUsernameModal({ platform: "TikTok", field: "tiktokUsername" }); return; }
+        break;
+      case "YouTube":
+        if (contact.youtubeUsername) url = `https://www.youtube.com/${sanitizeUsername(contact.youtubeUsername)}`;
+        else { setEditUsernameModal({ platform: "YouTube", field: "youtubeUsername" }); return; }
+        break;
+      case "LinkedIn":
+        if (contact.linkedinUsername) url = `https://www.linkedin.com/in/${sanitizeUsername(contact.linkedinUsername)}`;
+        else { setEditUsernameModal({ platform: "LinkedIn", field: "linkedinUsername" }); return; }
+        break;
+      default: return;
+    }
+    Linking.openURL(url);
+    setConnectModalVisible(false);
+  };
+
   const handleSaveUsername = async () => {
     if (!editUsernameModal) return;
-
-    // Clear previous error
     setUsernameError("");
-
-    // Basic validation
-    if (!usernameInput.trim()) {
-      setUsernameError("Username cannot be empty");
-      return;
+    if (!usernameInput.trim()) { setUsernameError("Username cannot be empty"); return; }
+    if (editUsernameModal.platform === "Instagram" && !/^[\w.](?!.*?\.{2})[\w.]{1,28}[\w]$/.test(usernameInput)) {
+      setUsernameError("Invalid Instagram username format"); return;
     }
-
-    // Platform-specific validation
-    switch (editUsernameModal.platform) {
-      case "Instagram":
-        if (!/^[\w.](?!.*?\.{2})[\w.]{1,28}[\w]$/.test(usernameInput)) {
-          setUsernameError("Invalid Instagram username format");
-          return;
-        }
-        break;
-      case "Twitter":
-        if (!/^[A-Za-z0-9_]{1,15}$/.test(usernameInput)) {
-          setUsernameError("Invalid Twitter username format");
-          return;
-        }
-        break;
-      // Add other platform-specific validations as needed
-    }
-
     const sanitized = sanitizeUsername(usernameInput.trim());
     (contact as any)[editUsernameModal.field] = sanitized;
-
     const key = `usernames_${contact.id}`;
     const saved = await AsyncStorage.getItem(key);
     const usernames = saved ? JSON.parse(saved) : {};
     usernames[editUsernameModal.field] = sanitized;
     await AsyncStorage.setItem(key, JSON.stringify(usernames));
-
     setEditUsernameModal(null);
     setUsernameInput("");
-
-    Alert.alert(
-      "Success",
-      `${editUsernameModal.platform} username ${
-        usernames[editUsernameModal.field] ? "updated" : "saved"
-      } successfully`
-    );
-
-    setTimeout(() => {
-      if (selectedNumber) {
-        openSocialMedia(editUsernameModal.platform, selectedNumber);
-      }
-    }, 300);
+    Alert.alert("Saved!", `${editUsernameModal.platform} username saved.`);
+    setTimeout(() => { if (selectedNumber) openSocialMedia(editUsernameModal.platform, selectedNumber); }, 300);
   };
 
-  // Update the Username Edit Modal to show error message
   const handleEditUsername = async () => {
     if (!editUsernameModal) return;
-
     const existingUsername = (contact as any)[editUsernameModal.field];
     if (existingUsername && !usernameInput.trim()) {
-      Alert.alert(
-        "Delete Username",
-        `Are you sure you want to delete the ${editUsernameModal.platform} username?`,
-        [
-          {
-            text: "Cancel",
-            style: "cancel",
+      Alert.alert("Delete Username", `Remove ${editUsernameModal.platform} username?`, [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete", style: "destructive",
+          onPress: async () => {
+            (contact as any)[editUsernameModal.field] = "";
+            const key = `usernames_${contact.id}`;
+            const saved = await AsyncStorage.getItem(key);
+            const usernames = saved ? JSON.parse(saved) : {};
+            delete usernames[editUsernameModal.field];
+            await AsyncStorage.setItem(key, JSON.stringify(usernames));
+            setEditUsernameModal(null);
+            setUsernameInput("");
           },
-          {
-            text: "Delete",
-            style: "destructive",
-            onPress: async () => {
-              // Remove the username
-              (contact as any)[editUsernameModal.field] = "";
-
-              // Update storage
-              const key = `usernames_${contact.id}`;
-              const saved = await AsyncStorage.getItem(key);
-              const usernames = saved ? JSON.parse(saved) : {};
-              delete usernames[editUsernameModal.field];
-              await AsyncStorage.setItem(key, JSON.stringify(usernames));
-
-              setEditUsernameModal(null);
-              setUsernameInput("");
-
-              Alert.alert(
-                "Success",
-                `${editUsernameModal.platform} username removed`
-              );
-            },
-          },
-        ]
-      );
+        },
+      ]);
       return;
     }
-
     handleSaveUsername();
   };
-
-  const { surface, background, text } = colors;
 
   return (
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={toggleExpand}
-      style={{
-        backgroundColor: surface,
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
-        shadowColor: colors.textSecondary,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-      }}
+      style={[cStyles.card, { backgroundColor: colors.surface, shadowColor: colors.primary }]}
     >
-      {/* Main contact info */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: expanded ? 12 : 0,
-        }}
-      >
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: colors.background,
-            justifyContent: "center",
-            alignItems: "center",
-            marginRight: 12,
-          }}
-        >
-          <Text style={{ fontSize: 16, fontWeight: "bold", color: "#3c1e90" }}>
-            {contact.name.charAt(0).toUpperCase()}
-          </Text>
+      {/* Contact row */}
+      <View style={cStyles.row}>
+        {/* Avatar */}
+        <View style={[cStyles.avatar, { backgroundColor: avatarColor }]}>
+          <Text style={cStyles.avatarText}>{contact.name.charAt(0).toUpperCase()}</Text>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 16, fontWeight: "600", color: colors.text }}>
-            {contact.name}
-          </Text>
+          <Text style={[cStyles.name, { color: colors.text }]}>{contact.name}</Text>
+          {!expanded && contact.phoneNumbers && contact.phoneNumbers.length > 0 && (
+            <Text style={[cStyles.phonePreview, { color: colors.subtext }]} numberOfLines={1}>
+              {contact.phoneNumbers[0].number}
+            </Text>
+          )}
         </View>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           {showHeart && (
-            <TouchableOpacity
-              onPress={handleFavorite}
-              style={{ marginRight: 8 }}
-            >
-              <Ionicons
-                name={isFavorite ? "heart" : "heart-outline"}
-                size={22}
-                color={isFavorite ? "#FF4D4F" : "#7B8AAB"}
-              />
+            <TouchableOpacity onPress={handleFavorite} style={cStyles.iconBtn} hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+              <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={20} color={isFavorite ? COLORS.heart : colors.subtext} />
             </TouchableOpacity>
           )}
           {onDelete && (
-            <TouchableOpacity onPress={onDelete}>
-              <Ionicons name="trash-outline" size={18} color="#F44336" />
+            <TouchableOpacity onPress={onDelete} style={cStyles.iconBtn} hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+              <Ionicons name="trash-outline" size={18} color="#ef4444" />
             </TouchableOpacity>
           )}
-          <Ionicons
-            name={expanded ? "chevron-up" : "chevron-down"}
-            size={20}
-            color="#7B8AAB"
-            style={{ marginLeft: 8 }}
-          />
+          <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={18} color={colors.subtext} />
         </View>
       </View>
 
-      {/* Phone numbers with Connect button - Animated */}
+      {/* Expanded phone numbers */}
       {expanded && (
-        <Animated.View
-          style={{
-            overflow: "hidden",
-          }}
-        >
-          {/* Divider */}
-          <View
-            style={{
-              height: 1,
-              backgroundColor: colors.border,
-              marginVertical: 8,
-            }}
-          />
-
-          {contact.phoneNumbers &&
-            contact.phoneNumbers.length > 0 &&
+        <Animated.View style={{ overflow: "hidden" }}>
+          <View style={[cStyles.divider, { backgroundColor: colors.divider }]} />
+          {contact.phoneNumbers && contact.phoneNumbers.length > 0 ? (
             contact.phoneNumbers.map((phone, idx) => (
-              <View
-                key={idx}
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  paddingVertical: 8,
-                  borderBottomWidth:
-                    idx === (contact.phoneNumbers?.length ?? 0) - 1 ? 0 : 1,
-                  borderBottomColor: colors.border,
-                }}
-              >
-                <Text style={{ fontSize: 14, color: "#8191adff" }}>
-                  {phone.number}
-                </Text>
+              <View key={idx} style={[cStyles.phoneRow, idx < (contact.phoneNumbers?.length ?? 0) - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                <Ionicons name="call-outline" size={14} color={colors.subtext} style={{ marginRight: 6 }} />
+                <Text style={[cStyles.phoneNumber, { color: colors.textSecondary }]}>{phone.number}</Text>
                 <TouchableOpacity
-                  style={{
-                    backgroundColor: "#40916c",
-                    borderRadius: 8,
-                    paddingVertical: 6,
-                    paddingHorizontal: 16,
-                    alignItems: "center",
-                  }}
-                  onPress={() => {
-                    setSelectedNumber(phone.number);
-                    setConnectModalVisible(true);
-                  }}
+                  style={[cStyles.connectBtn, { backgroundColor: colors.primary }]}
+                  onPress={() => { setSelectedNumber(phone.number); setConnectModalVisible(true); }}
                 >
-                  <Text style={{ color: "white", fontWeight: "bold" }}>
-                    Connect
-                  </Text>
+                  <Text style={cStyles.connectBtnText}>Connect</Text>
                 </TouchableOpacity>
               </View>
-            ))}
+            ))
+          ) : (
+            <Text style={[cStyles.noPhone, { color: colors.subtext }]}>No phone number</Text>
+          )}
         </Animated.View>
       )}
 
       {/* Connect Modal */}
-      <Modal
-        visible={connectModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setConnectModalVisible(false)}
-      >
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            justifyContent: "flex-end",
-            backgroundColor: "#0008",
-          }}
-          activeOpacity={1}
-          onPress={() => setConnectModalVisible(false)}
-        >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={e => e.stopPropagation()}
-            style={{
-              backgroundColor: colors.background,
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              padding: 20,
-              minHeight: 320,
-            }}
-          >
-            <Text
-              style={{
-                fontWeight: "bold",
-                fontSize: 18,
-                marginBottom: 16,
-                color: colors.textSecondary || "#fff",
-              }}
-            >
-              Connect via
-            </Text>
-            {/* Main platforms */}
-            {[
-              "Call",
-              "WhatsApp",
-              "Telegram",
-              "Facebook",
-              "Instagram",
-              "Snapchat",
-              "TikTok",
-              "YouTube",
-              "LinkedIn",
-            ].map(platform => (
+      <Modal visible={connectModalVisible} transparent animationType="slide" onRequestClose={() => setConnectModalVisible(false)}>
+        <TouchableOpacity style={cStyles.modalBackdrop} activeOpacity={1} onPress={() => setConnectModalVisible(false)}>
+          <TouchableOpacity activeOpacity={1} onPress={e => e.stopPropagation()} style={[cStyles.connectSheet, { backgroundColor: colors.surface }]}>
+            <View style={cStyles.sheetHandle} />
+            <Text style={[cStyles.connectSheetTitle, { color: colors.text }]}>Connect via</Text>
+            {["Call","WhatsApp","Telegram","Facebook","Instagram","Snapchat","TikTok","YouTube","LinkedIn"].map(platform => (
               <TouchableOpacity
                 key={platform}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingVertical: 12,
-                  borderBottomWidth: 1,
-                  borderColor: "#cdcdcd21",
-                  justifyContent: "space-between",
-                }}
-                onPress={() => {
-                  if (selectedNumber) {
-                    openSocialMedia(platform, selectedNumber);
-                  }
-                }}
+                style={[cStyles.platformRow, { borderBottomColor: colors.divider }]}
+                onPress={() => { if (selectedNumber) openSocialMedia(platform, selectedNumber); }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
                   {PLATFORM_ICONS[platform]}
-                  <Text style={{ fontSize: 16, color: colors.text }}>
+                  <Text style={[cStyles.platformName, { color: colors.text }]}>
                     {platform}
-                    {platform === "Facebook" && contact.facebookUsername
-                      ? ` (@${contact.facebookUsername.slice(0, 15)})`
-                      : ""}
-                    {platform === "Instagram" && contact.instagramUsername
-                      ? ` (@${contact.instagramUsername.slice(0, 15) + "..."})`
-                      : ""}
-                    {platform === "Snapchat" && contact.snapchatUsername
-                      ? ` (@${contact.snapchatUsername.slice(0, 15) + "..."})`
-                      : ""}
-                    {platform === "TikTok" && contact.tiktokUsername
-                      ? ` (@${contact.tiktokUsername.slice(0, 15) + "..."})`
-                      : ""}
-                    {platform === "YouTube" && contact.youtubeUsername
-                      ? ` (${contact.youtubeUsername.slice(0, 15) + "..."})`
-                      : ""}
-                    {platform === "LinkedIn" && contact.linkedinUsername
-                      ? ` (@${contact.linkedinUsername.slice(0, 15) + "..."})`
-                      : ""}
+                    {platform === "Facebook" && contact.facebookUsername ? ` (@${contact.facebookUsername.slice(0, 15)})` : ""}
+                    {platform === "Instagram" && contact.instagramUsername ? ` (@${contact.instagramUsername.slice(0, 12)}…)` : ""}
+                    {platform === "Snapchat" && contact.snapchatUsername ? ` (@${contact.snapchatUsername.slice(0, 12)}…)` : ""}
+                    {platform === "TikTok" && contact.tiktokUsername ? ` (@${contact.tiktokUsername.slice(0, 12)}…)` : ""}
+                    {platform === "YouTube" && contact.youtubeUsername ? ` (${contact.youtubeUsername.slice(0, 12)}…)` : ""}
+                    {platform === "LinkedIn" && contact.linkedinUsername ? ` (@${contact.linkedinUsername.slice(0, 12)}…)` : ""}
                   </Text>
                 </View>
-
-                {[
-                  "Facebook",
-                  "Instagram",
-                  "Snapchat",
-                  "TikTok",
-                  "YouTube",
-                  "LinkedIn",
-                ].includes(platform) && (
+                {["Facebook","Instagram","Snapchat","TikTok","YouTube","LinkedIn"].includes(platform) && (
                   <TouchableOpacity
-                    style={{
-                      padding: 8,
-                      backgroundColor: "#542967ff",
-                      borderRadius: 6,
-                      marginLeft: 8,
-                    }}
+                    style={[cStyles.editUsernameBtn, { backgroundColor: colors.primary }]}
                     onPress={() => {
                       const field = `${platform.toLowerCase()}Username`;
                       setUsernameInput((contact as any)[field] || "");
-                      setEditUsernameModal({
-                        platform,
-                        field,
-                      });
+                      setEditUsernameModal({ platform, field });
                     }}
                   >
-                    <Ionicons name="pencil" size={16} color="#f5f5f5ff" />
+                    <Ionicons name="pencil" size={14} color="#fff" />
                   </TouchableOpacity>
                 )}
               </TouchableOpacity>
@@ -685,109 +318,31 @@ export default function Contact({
       </Modal>
 
       {/* Username Edit Modal */}
-      <Modal
-        visible={!!editUsernameModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => {
-          setEditUsernameModal(null);
-          setUsernameInput("");
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: colors.overlay || "rgba(0,0,0,0.5)",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: colors.background,
-              borderRadius: 12,
-              padding: 24,
-              width: "80%",
-            }}
-          >
-            <Text
-              style={{
-                fontWeight: "bold",
-                fontSize: 16,
-                marginBottom: 12,
-                color: colors.textSecondary || "#fff",
-              }}
-            >
+      <Modal visible={!!editUsernameModal} transparent animationType="fade" onRequestClose={() => { setEditUsernameModal(null); setUsernameInput(""); }}>
+        <View style={[cStyles.modalOverlay, { backgroundColor: colors.overlay }]}>
+          <View style={[cStyles.usernameCard, { backgroundColor: colors.surface }]}>
+            <Text style={[cStyles.usernameTitle, { color: colors.text }]}>
               {editUsernameModal && (contact as any)[editUsernameModal.field]
                 ? `Edit ${editUsernameModal.platform} Username`
-                : `Enter ${
-                    editUsernameModal ? editUsernameModal.platform : ""
-                  } Username`}
+                : `Enter ${editUsernameModal?.platform ?? ""} Username`}
             </Text>
             <TextInput
               value={usernameInput}
-              onChangeText={text => {
-                setUsernameInput(text);
-                setUsernameError("");
-              }}
+              onChangeText={t => { setUsernameInput(t); setUsernameError(""); }}
               placeholder="Username"
-              placeholderTextColor="#666"
-              style={{
-                borderWidth: 1,
-                borderColor: usernameError ? "#F56565" : "#ccc",
-                borderRadius: 8,
-                padding: 10,
-                marginBottom: usernameError ? 4 : 16,
-                color: colors.subtext,
-              }}
+              placeholderTextColor={colors.placeholder}
+              style={[cStyles.usernameInput, { borderColor: usernameError ? "#ef4444" : colors.border, color: colors.text, backgroundColor: colors.input }]}
               autoCapitalize="none"
             />
-            {usernameError ? (
-              <Text
-                style={{ color: "#F56565", fontSize: 12, marginBottom: 16 }}
-              >
-                {usernameError}
-              </Text>
-            ) : null}
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
-            >
-              <TouchableOpacity
-                style={{
-                  backgroundColor: colors.primary,
-                  borderRadius: 8,
-                  padding: 12,
-                  alignItems: "center",
-                  flex: 1,
-                  marginRight: 8,
-                }}
-                onPress={handleEditUsername}
-              >
-                <Text style={{ color: COLORS.white, fontWeight: "bold" }}>
-                  {editUsernameModal &&
-                  (contact as any)[editUsernameModal.field]
-                    ? usernameInput.trim()
-                      ? "Update"
-                      : "Delete"
-                    : "Save"}
+            {!!usernameError && <Text style={cStyles.usernameError}>{usernameError}</Text>}
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <TouchableOpacity style={[cStyles.usernameSaveBtn, { backgroundColor: colors.primary }]} onPress={handleEditUsername}>
+                <Text style={{ color: "#fff", fontWeight: "700" }}>
+                  {editUsernameModal && (contact as any)[editUsernameModal.field] ? (usernameInput.trim() ? "Update" : "Delete") : "Save"}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  setEditUsernameModal(null);
-                  setUsernameInput("");
-                }}
-                style={{
-                  backgroundColor: "#EDF2F7",
-                  borderRadius: 8,
-                  padding: 12,
-                  alignItems: "center",
-                  flex: 1,
-                }}
-              >
-                <Text style={{ color: "#2D3748", fontWeight: "bold" }}>
-                  Cancel
-                </Text>
+              <TouchableOpacity style={cStyles.usernameCancelBtn} onPress={() => { setEditUsernameModal(null); setUsernameInput(""); }}>
+                <Text style={{ color: colors.textSecondary, fontWeight: "600" }}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -796,3 +351,33 @@ export default function Contact({
     </TouchableOpacity>
   );
 }
+
+const cStyles = StyleSheet.create({
+  card: { borderRadius: 14, padding: 14, marginBottom: 10, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 6, elevation: 3 },
+  row: { flexDirection: "row", alignItems: "center" },
+  avatar: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", marginRight: 12 },
+  avatarText: { fontSize: 18, fontWeight: "700", color: "#fff" },
+  name: { fontSize: 16, fontWeight: "600" },
+  phonePreview: { fontSize: 12, marginTop: 2 },
+  iconBtn: { padding: 2 },
+  divider: { height: 1, marginVertical: 10 },
+  phoneRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8 },
+  phoneNumber: { flex: 1, fontSize: 14 },
+  connectBtn: { paddingVertical: 6, paddingHorizontal: 14, borderRadius: 8 },
+  connectBtnText: { color: "#fff", fontWeight: "700", fontSize: 13 },
+  noPhone: { fontSize: 14, fontStyle: "italic", paddingVertical: 6 },
+  modalBackdrop: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" },
+  connectSheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, minHeight: 300 },
+  sheetHandle: { width: 40, height: 4, backgroundColor: "#E2E8F0", borderRadius: 2, alignSelf: "center", marginBottom: 16 },
+  connectSheetTitle: { fontSize: 17, fontWeight: "700", marginBottom: 12 },
+  platformRow: { flexDirection: "row", alignItems: "center", paddingVertical: 12, borderBottomWidth: 1, justifyContent: "space-between" },
+  platformName: { fontSize: 15 },
+  editUsernameBtn: { padding: 8, borderRadius: 8, marginLeft: 8 },
+  modalOverlay: { flex: 1, justifyContent: "center", alignItems: "center" },
+  usernameCard: { width: "82%", borderRadius: 16, padding: 22 },
+  usernameTitle: { fontSize: 16, fontWeight: "700", marginBottom: 14 },
+  usernameInput: { borderWidth: 1, borderRadius: 10, padding: 10, marginBottom: 6, fontSize: 15 },
+  usernameError: { color: "#ef4444", fontSize: 12, marginBottom: 12 },
+  usernameSaveBtn: { flex: 1, borderRadius: 10, paddingVertical: 12, alignItems: "center" },
+  usernameCancelBtn: { flex: 1, borderRadius: 10, paddingVertical: 12, alignItems: "center", backgroundColor: "#F1F5F9" },
+});

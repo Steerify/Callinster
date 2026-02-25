@@ -1,74 +1,64 @@
-<<<<<<< HEAD
-import { COLORS } from "../constants/theme";
-import { StyleSheet } from "react-native";
-=======
-import { COLORS } from "@/constants/theme";
 import { Dimensions, StyleSheet } from "react-native";
-import { useTheme } from "@/contexts/ThemeContext";
-const { width } = Dimensions.get("window");
->>>>>>> 7a580322cee3a3599f949a01a96fbd488559301e
+import { COLORS } from "../constants/theme";
 
+const { width } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
     paddingHorizontal: 16,
   },
-    searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 5,
-    backgroundColor: 'white', 
-    borderRadius: 30, 
-    alignSelf:"center",
-    marginTop:12,
-    marginLeft:15,
-    marginBottom:-6,
-    width:270
+    backgroundColor: "white",
+    borderRadius: 30,
+    alignSelf: "center",
+    marginTop: 12,
+    marginLeft: 15,
+    marginBottom: -6,
+    width: 270,
   },
   menuButton: {
     marginRight: 12,
-    marginLeft:12,
-    color:COLORS.primary
+    marginLeft: 12,
+    color: COLORS.primary,
   },
-
   header: {
-    position: "fixed",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 20,
     marginBottom: 10,
-    backgroundColor: COLORS.background,
   },
   textInput: {
     flex: 1,
-    backgroundColor: COLORS.surface,
+    backgroundColor: "#fff",
     borderRadius: 30,
     padding: 10,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: "#E2E8F0",
   },
   text: {
     color: "white",
-    fontWeight: "slim",
+    fontWeight: "600",
     fontSize: 15,
     marginBottom: 0,
     fontFamily: "JetBrainsMono-Medium",
   },
   card: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     marginVertical: 5,
     padding: 15,
-    shadowColor: "#000",
+    shadowColor: "#091556",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 3,
   },
   name: {
     color: COLORS.primary,
@@ -79,22 +69,21 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   appName: {
-    color: COLORS.text,
+    color: COLORS.primary,
     fontWeight: "bold",
     fontSize: 20,
     fontFamily: "JetBrainsMono-Medium",
     alignContent: "center",
     flex: 1,
   },
-
   phone: {
-    color: COLORS.text,
+    color: "#4A5568",
     fontSize: 16,
     marginBottom: 2,
     letterSpacing: 0.5,
   },
   button: {
-    backgroundColor: COLORS.green,
+    backgroundColor: COLORS.secondary,
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 18,
@@ -102,7 +91,7 @@ export const styles = StyleSheet.create({
     marginVertical: 8,
   },
   buttonText: {
-    color: COLORS.white,
+    color: "#FFFFFF",
     fontWeight: "bold",
     fontSize: 16,
   },
@@ -110,10 +99,10 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: COLORS.background,
+    backgroundColor: "rgba(9,21,86,0.07)",
   },
   modalContent: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: "#ffffff",
     padding: 24,
     borderRadius: 20,
     width: "90%",
@@ -125,13 +114,13 @@ export const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: "#E2E8F0",
     marginBottom: 12,
     padding: 10,
     borderRadius: 8,
     fontSize: 16,
-    backgroundColor: COLORS.surfaceLight,
-    color: COLORS.text,
+    backgroundColor: "#F7FAFC",
+    color: "#1b3872",
   },
   prefixRow: {
     flexDirection: "row",
@@ -140,11 +129,11 @@ export const styles = StyleSheet.create({
     marginBottom: 2,
   },
   prefixText: {
-    color: COLORS.text,
+    color: "#1b3872",
     fontSize: 15,
   },
   removeText: {
-    color: COLORS.heart,
+    color: "#FF5E7E",
     marginLeft: 12,
     fontWeight: "bold",
     fontSize: 15,
