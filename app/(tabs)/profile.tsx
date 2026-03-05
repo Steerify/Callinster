@@ -40,6 +40,8 @@ export default function Profile() {
   const { colors } = useTheme();
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);
   const [showPlanDetails, setShowPlanDetails] = useState(false);
+  const [accountModalVisible, setAccountModalVisible] = useState(false);
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
 
   const userData = {
     name: user?.fullName || "Guest User",
@@ -93,8 +95,8 @@ export default function Profile() {
   const settingsRows = [
     { label: "Notification Settings", icon: "notifications-outline", color: "#7c3aed", onPress: () => setNotificationModalVisible(true) },
     { label: "Test Notifications", icon: "notifications-circle-outline", color: "#0ea5e9", onPress: sendTestNotification },
-    { label: "Account", icon: "person-circle-outline", color: "#10b981", onPress: () => {} },
-    { label: "Privacy", icon: "lock-closed-outline", color: "#f59e0b", onPress: () => {} },
+    { label: "Account", icon: "person-circle-outline", color: "#10b981", onPress: () => setAccountModalVisible(true) },
+    { label: "Privacy", icon: "lock-closed-outline", color: "#f59e0b", onPress: () => setPrivacyModalVisible(true) },
     { label: "Help & Support", icon: "help-circle-outline", color: "#6366f1", onPress: () => Linking.openURL("mailto:support@callinster.com") },
   ];
 
@@ -226,6 +228,57 @@ export default function Profile() {
                 </View>
               ))}
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Account Info Modal */}
+      <Modal animationType="slide" transparent visible={accountModalVisible} onRequestClose={() => setAccountModalVisible(false)}>
+        <View style={pStyles.modalOverlay}>
+          <View style={[pStyles.modalCard, { backgroundColor: colors.surface }]}>
+            <View style={pStyles.modalHeader}>
+              <Text style={[pStyles.modalTitle, { color: colors.text }]}>Account Information</Text>
+              <TouchableOpacity onPress={() => setAccountModalVisible(false)}>
+                <Ionicons name="close" size={24} color={colors.subtext} />
+              </TouchableOpacity>
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 4 }}>Full Name</Text>
+              <Text style={{ color: colors.text, fontSize: 16, fontWeight: "500", marginBottom: 16 }}>{userData.name}</Text>
+              
+              <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 4 }}>Email Address</Text>
+              <Text style={{ color: colors.text, fontSize: 16, fontWeight: "500", marginBottom: 16 }}>{userData.email}</Text>
+              
+              <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 4 }}>Current Plan</Text>
+              <Text style={{ color: colors.primary, fontSize: 16, fontWeight: "700" }}>{tierLabel}</Text>
+            </View>
+            <TouchableOpacity style={[pStyles.doneBtn, { backgroundColor: colors.primary, marginTop: 24 }]} onPress={() => setAccountModalVisible(false)}>
+              <Text style={{ color: "#fff", fontWeight: "700" }}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Privacy Modal */}
+      <Modal animationType="slide" transparent visible={privacyModalVisible} onRequestClose={() => setPrivacyModalVisible(false)}>
+        <View style={pStyles.modalOverlay}>
+          <View style={[pStyles.modalCard, { backgroundColor: colors.surface }]}>
+            <View style={pStyles.modalHeader}>
+              <Text style={[pStyles.modalTitle, { color: colors.text }]}>Privacy Settings</Text>
+              <TouchableOpacity onPress={() => setPrivacyModalVisible(false)}>
+                <Ionicons name="close" size={24} color={colors.subtext} />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: colors.textSecondary, marginBottom: 16, lineHeight: 22 }}>
+              Your privacy is extremely important to us. 
+              {"\n\n"}
+              • Callinster only requests contacts access strictly for scheduling calls on your device. {"\n"}
+              • Your contacts are processed locally and are never uploaded to our servers. {"\n"}
+              • All scheduled notifications and call metadata remain on your phone.
+            </Text>
+            <TouchableOpacity style={[pStyles.doneBtn, { backgroundColor: colors.primary }]} onPress={() => setPrivacyModalVisible(false)}>
+              <Text style={{ color: "#fff", fontWeight: "700" }}>Understood</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

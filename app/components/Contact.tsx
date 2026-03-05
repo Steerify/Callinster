@@ -60,6 +60,7 @@ function getAvatarColor(name: string): string {
 const PLATFORM_ICONS: Record<string, React.ReactNode> = {
   Call: <Ionicons name="call" size={20} color="#48BB78" style={{ marginRight: 10 }} />,
   WhatsApp: <FontAwesome name="whatsapp" size={20} color="#25D366" style={{ marginRight: 10 }} />,
+  "WhatsApp Business": <FontAwesome5 name="whatsapp" size={20} color="#128C7E" style={{ marginRight: 10 }} />,
   Telegram: <FontAwesome name="telegram" size={20} color="#229ED9" style={{ marginRight: 10 }} />,
   Facebook: <FontAwesome name="facebook" size={20} color="#1877F3" style={{ marginRight: 10 }} />,
   Instagram: <Entypo name="instagram" size={20} color="#C13584" style={{ marginRight: 10 }} />,
@@ -141,6 +142,7 @@ export default function Contact({ contact, onDelete, showHeart = false, onFavori
     switch (platform) {
       case "Call": url = `tel:${number}`; break;
       case "WhatsApp": url = `https://wa.me/${formatPhoneNumber(phoneNumber)}`; break;
+      case "WhatsApp Business": url = `https://wa.me/${formatPhoneNumber(phoneNumber)}`; break;
       case "Telegram": url = `https://t.me/${formatPhoneNumber(phoneNumber)}`; break;
       case "Facebook":
         if (contact.facebookUsername) url = `fb://profile/${sanitizeUsername(contact.facebookUsername)}`;
@@ -281,7 +283,7 @@ export default function Contact({ contact, onDelete, showHeart = false, onFavori
           <TouchableOpacity activeOpacity={1} onPress={e => e.stopPropagation()} style={[cStyles.connectSheet, { backgroundColor: colors.surface }]}>
             <View style={cStyles.sheetHandle} />
             <Text style={[cStyles.connectSheetTitle, { color: colors.text }]}>Connect via</Text>
-            {["Call","WhatsApp","Telegram","Facebook","Instagram","Snapchat","TikTok","YouTube","LinkedIn"].map(platform => (
+            {["Call","WhatsApp","WhatsApp Business","Telegram","Facebook","Instagram","Snapchat","TikTok","YouTube","LinkedIn"].map(platform => (
               <TouchableOpacity
                 key={platform}
                 style={[cStyles.platformRow, { borderBottomColor: colors.divider }]}

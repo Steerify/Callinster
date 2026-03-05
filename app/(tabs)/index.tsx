@@ -68,6 +68,7 @@ type WeeklyPreferences = {
 const callingApps: CallingApp[] = [
   { id: "phone", name: "Phone", icon: "call-outline" },
   { id: "whatsapp", name: "WhatsApp", icon: "logo-whatsapp" },
+  { id: "whatsappbiz", name: "WhatsApp Business", icon: "logo-whatsapp" },
   { id: "messenger", name: "Messenger", icon: "logo-facebook", requiresUsername: true },
   { id: "telegram", name: "Telegram", icon: "paper-plane-outline" },
   { id: "skype", name: "Skype", icon: "logo-skype", requiresUsername: true },
@@ -91,6 +92,7 @@ const getFallbackLink = (appId: string, contact: string): string => {
   const cleaned = cleanContact(contact, callingApps.some(a => a.id === appId && a.requiresUsername));
   switch (appId) {
     case "whatsapp": return `https://wa.me/${cleaned.replace(/\+/g, "")}`;
+    case "whatsappbiz": return `https://wa.me/${cleaned.replace(/\+/g, "")}`;
     case "telegram": return `https://t.me/${cleaned.replace(/^@/, "")}`;
     case "skype": return `https://join.skype.com/invite/${cleaned}`;
     case "zoom": return `https://zoom.us/j/${encodeURIComponent(cleaned)}`;
@@ -123,6 +125,7 @@ export async function resetCounter(key: string) {
 const getAppStoreLink = (appId: string): string => {
   const links: Record<string, string> = {
     whatsapp: Platform.OS === "ios" ? "https://apps.apple.com/app/whatsapp-messenger/id310633997" : "https://play.google.com/store/apps/details?id=com.whatsapp",
+    whatsappbiz: Platform.OS === "ios" ? "https://apps.apple.com/app/whatsapp-business/id1386412985" : "https://play.google.com/store/apps/details?id=com.whatsapp.w4b",
     messenger: Platform.OS === "ios" ? "https://apps.apple.com/app/facebook-messenger/id454638411" : "https://play.google.com/store/apps/details?id=com.facebook.orca",
     telegram: Platform.OS === "ios" ? "https://apps.apple.com/app/telegram-messenger/id686449807" : "https://play.google.com/store/apps/details?id=org.telegram.messenger",
     skype: Platform.OS === "ios" ? "https://apps.apple.com/app/skype/id304878510" : "https://play.google.com/store/apps/details?id=com.skype.raider",
@@ -198,6 +201,7 @@ export default function Index() {
     saturday: { calls: true, messages: true },
     sunday: { calls: true, messages: true },
   });
+  const [tempWeeklyPreferences, setTempWeeklyPreferences] = useState<WeeklyPreferences>(weeklyPreferences);
   const [showPreferencesModal, setShowPreferencesModal] = useState(false);
 
   const { colors } = useTheme();
@@ -271,6 +275,30 @@ export default function Index() {
       textColor: "#091556",
       icon: "rocket",
     },
+    {
+      key: "quote3",
+      title: "Persistence",
+      subtitle: "It does not matter how slowly you go as long as you do not stop. – Confucius",
+      bgColor: "#fff0f5",
+      textColor: "#db2777",
+      icon: "walk",
+    },
+    {
+      key: "quote4",
+      title: "Connection",
+      subtitle: "The most important thing in communication is hearing what isn't said. – Peter Drucker",
+      bgColor: "#e0f2fe",
+      textColor: "#0284c7",
+      icon: "chatbubbles",
+    },
+    {
+      key: "quote5",
+      title: "Growth",
+      subtitle: "Don't watch the clock; do what it does. Keep going. – Sam Levenson",
+      bgColor: "#fef3c7",
+      textColor: "#d97706",
+      icon: "time",
+    },
   ];
 
   const initiateCall = useCallback(async (appId: string, contact: string) => {
@@ -282,6 +310,7 @@ export default function Index() {
     switch (appId) {
       case "phone": url = `tel:${cleaned}`; break;
       case "whatsapp": url = `whatsapp://send?phone=${cleaned.replace("+", "")}`; break;
+      case "whatsappbiz": url = Platform.OS === "ios" ? `whatsapp-smb://send?phone=${cleaned.replace("+", "")}` : `whatsapp://send?phone=${cleaned.replace("+", "")}`; break;
       case "messenger": url = `fb-messenger://user/${cleaned}`; break;
       case "telegram": url = `tg://resolve?domain=${cleaned.replace(/^@/, "")}`; break;
       case "skype": url = `skype:${cleaned}?call`; break;
@@ -396,8 +425,13 @@ export default function Index() {
 
         // Load stored favorites
         const storedFavs = await AsyncStorage.getItem("favoriteContacts");
-        const favList: MyContact[] = storedFavs ? JSON.parse(storedFavs) : [];
+        let favList: MyContact[] = storedFavs ? JSON.parse(storedFavs) : [];
 
+        // Ensure we always have a favorite contact logic on init
+        if (favList.length === 0 && shuffled.length > 0) {
+          favList.push(shuffled[0]);
+          await AsyncStorage.setItem("favoriteContacts", JSON.stringify(favList));
+        }
         setFavoriteContacts(favList);
         setAllContacts(shuffled);
 
@@ -444,7 +478,7 @@ export default function Index() {
           data: { app: selectedApp, contact: cleanedContact, type: "scheduled-call" },
           sound: true,
         },
-        trigger: { date: callTime, channelId: "call-notifications" },
+        trigger: callTime,
       });
       const callData: ScheduledCall = {
         id: Date.now().toString(),
@@ -500,15 +534,44 @@ export default function Index() {
     const deletesToday = await getCounter("deletes");
     if (deletesToday >= limit) { setShowSubModal(true); return; }
     await incrementCounter("deletes");
-    setFiveContacts(prev => {
-      const updated = prev.filter(contact => contact.id !== id);
-      const remaining = allContacts.filter(c => !updated.some(fc => fc.id === c.id) && c.id !== id);
-      if (remaining.length > 0) {
-        const next = remaining[Math.floor(Math.random() * remaining.length)];
-        return [...updated, next];
+    const updated = fiveContacts.filter(contact => contact.id !== id);
+    const currentFavsInUpdated = updated.filter(u => favoriteContacts.some(fc => fc.id === u.id)).length;
+    
+    const remainingFavs = favoriteContacts.filter(fc => !updated.some(u => u.id === fc.id) && fc.id !== id && allContacts.some(ac => ac.id === fc.id));
+    const remainingAll = allContacts.filter(c => !updated.some(fc => fc.id === c.id) && c.id !== id);
+    
+    if (remainingAll.length > 0) {
+      let next: MyContact;
+      let shouldAutoFavorite = false;
+
+      if (currentFavsInUpdated < 1) {
+        if (remainingFavs.length > 0) {
+          next = remainingFavs[Math.floor(Math.random() * remainingFavs.length)];
+        } else {
+          next = remainingAll[Math.floor(Math.random() * remainingAll.length)];
+          shouldAutoFavorite = true;
+        }
+      } else if (currentFavsInUpdated >= 3) {
+        const nonFavs = remainingAll.filter(c => !favoriteContacts.some(fc => fc.id === c.id));
+        if (nonFavs.length > 0) {
+          next = nonFavs[Math.floor(Math.random() * nonFavs.length)];
+        } else {
+          next = remainingAll[Math.floor(Math.random() * remainingAll.length)];
+        }
+      } else {
+        next = remainingAll[Math.floor(Math.random() * remainingAll.length)];
       }
-      return updated;
-    });
+
+      if (shouldAutoFavorite) {
+        const newFavs = [...favoriteContacts, next];
+        setFavoriteContacts(newFavs);
+        AsyncStorage.setItem("favoriteContacts", JSON.stringify(newFavs));
+      }
+
+      setFiveContacts([...updated, next]);
+    } else {
+      setFiveContacts(updated);
+    }
     setAllContacts(prev => prev.filter(contact => contact.id !== id));
   }
 
@@ -591,7 +654,7 @@ export default function Index() {
 
           <TouchableOpacity
             style={[localStyles.drawerItem, { backgroundColor: colors.card }]}
-            onPress={() => { setDrawerOpen(false); setShowPreferencesModal(true); }}
+            onPress={() => { setTempWeeklyPreferences(weeklyPreferences); setDrawerOpen(false); setShowPreferencesModal(true); }}
           >
             <View style={[localStyles.drawerItemIcon, { backgroundColor: "#e8f5e9" }]}>
               <Ionicons name="calendar-outline" size={20} color="#2e7d32" />
@@ -839,9 +902,22 @@ export default function Index() {
             <Loader size="large" style={{ flex: 1, backgroundColor: colors.background }} />
           ) : (
             <View style={{ paddingHorizontal: 4 }}>
-              {(searchQuery.trim() ? allContacts : fiveContacts)
-                .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map(contact => (
+              {(() => {
+                const filtered = (searchQuery.trim() ? allContacts : fiveContacts).filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
+                if (filtered.length === 0 && searchQuery.trim()) {
+                  return (
+                    <View style={{ alignItems: "center", justifyContent: "center", paddingVertical: 40, opacity: 0.6 }}>
+                      <Ionicons name="search-outline" size={48} color={colors.subtext} style={{ marginBottom: 12 }} />
+                      <Text style={{ color: colors.textSecondary, fontSize: 16, fontWeight: "500", textAlign: "center" }}>
+                        Contact not found
+                      </Text>
+                      <Text style={{ color: colors.subtext, fontSize: 13, marginTop: 4, textAlign: "center" }}>
+                        Try searching with a different name.
+                      </Text>
+                    </View>
+                  );
+                }
+                return filtered.map(contact => (
                   <Contact
                     key={contact.id}
                     contact={contact}
@@ -849,7 +925,8 @@ export default function Index() {
                     showHeart={tier === "elite"}
                     weeklyPreferences={weeklyPreferences}
                   />
-                ))}
+                ));
+              })()}
             </View>
           )}
         </ScrollView>
@@ -978,15 +1055,15 @@ export default function Index() {
                 </TouchableOpacity>
               </View>
               <ScrollView>
-                {Object.entries(weeklyPreferences).map(([day, prefs]) => (
+                {Object.entries(tempWeeklyPreferences).map(([day, prefs]) => (
                   <View key={day} style={[localStyles.prefRow, { borderBottomColor: colors.divider }]}>
                     <Text style={[localStyles.dayText, { color: colors.text }]}>{day.charAt(0).toUpperCase() + day.slice(1)}</Text>
                     <View style={{ flexDirection: "row", gap: 8 }}>
                       <TouchableOpacity
                         style={[localStyles.prefChip, { backgroundColor: prefs.calls ? colors.primary : colors.card, borderColor: colors.border }]}
                         onPress={() => {
-                          const updated = { ...weeklyPreferences, [day]: { ...weeklyPreferences[day as keyof WeeklyPreferences], calls: !prefs.calls } };
-                          setWeeklyPreferences(updated);
+                          const updated = { ...tempWeeklyPreferences, [day]: { ...tempWeeklyPreferences[day as keyof WeeklyPreferences], calls: !prefs.calls } };
+                          setTempWeeklyPreferences(updated);
                         }}
                       >
                         <Ionicons name="call-outline" size={14} color={prefs.calls ? "#fff" : colors.textSecondary} />
@@ -995,8 +1072,8 @@ export default function Index() {
                       <TouchableOpacity
                         style={[localStyles.prefChip, { backgroundColor: prefs.messages ? colors.secondary : colors.card, borderColor: colors.border }]}
                         onPress={() => {
-                          const updated = { ...weeklyPreferences, [day]: { ...weeklyPreferences[day as keyof WeeklyPreferences], messages: !prefs.messages } };
-                          setWeeklyPreferences(updated);
+                          const updated = { ...tempWeeklyPreferences, [day]: { ...tempWeeklyPreferences[day as keyof WeeklyPreferences], messages: !prefs.messages } };
+                          setTempWeeklyPreferences(updated);
                         }}
                       >
                         <Ionicons name="chatbubble-outline" size={14} color={prefs.messages ? "#fff" : colors.textSecondary} />
@@ -1012,7 +1089,7 @@ export default function Index() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[localStyles.savePrefsBtn, { backgroundColor: colors.primary }]}
-                  onPress={async () => { await savePreferences(weeklyPreferences); setShowPreferencesModal(false); }}
+                  onPress={async () => { await savePreferences(tempWeeklyPreferences); setShowPreferencesModal(false); }}
                 >
                   <Text style={{ color: "#fff", fontWeight: "700" }}>Save</Text>
                 </TouchableOpacity>
