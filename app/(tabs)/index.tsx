@@ -171,7 +171,7 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [showSubModal, setShowSubModal] = useState(false);
   const [showPlanDetails, setShowPlanDetails] = useState(false);
-  const { tier } = useSubscription();
+  const { tier, status, checkoutState, error, startCheckout } = useSubscription();
   const [favoriteContacts, setFavoriteContacts] = useState<MyContact[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
@@ -820,7 +820,7 @@ export default function Index() {
               <View style={[localStyles.upgradeCard, { backgroundColor: colors.surface }]}>
                 <Text style={[localStyles.upgradeTitle, { color: colors.primary }]}>Daily Limit Reached</Text>
                 <Text style={{ color: colors.textSecondary, marginBottom: 20, textAlign: "center" }}>
-                  You've reached your daily delete limit. Upgrade for more!
+                  You&apos;ve reached your daily delete limit. Upgrade for more!
                 </Text>
                 <TouchableOpacity
                   style={[localStyles.upgradePrimaryBtn, { backgroundColor: colors.primary }]}
@@ -873,8 +873,14 @@ export default function Index() {
                       <Text style={[localStyles.planFeature, { color: colors.textSecondary }]}>{f}</Text>
                     </View>
                   ))}
-                  <TouchableOpacity style={[localStyles.planBtn, { backgroundColor: colors.primary }]}>
-                    <Text style={{ color: "#fff", fontWeight: "700" }}>Upgrade to Premium</Text>
+                  <TouchableOpacity
+                    style={[localStyles.planBtn, { backgroundColor: colors.primary, opacity: checkoutState === "pending" ? 0.6 : 1 }]}
+                    disabled={checkoutState === "pending" || tier === "premium"}
+                    onPress={() => { void startCheckout("premium"); }}
+                  >
+                    <Text style={{ color: "#fff", fontWeight: "700" }}>
+                      {tier === "premium" ? "Current Plan" : checkoutState === "pending" ? "Waiting for PayPal..." : "Upgrade to Premium"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
 
@@ -887,10 +893,29 @@ export default function Index() {
                       <Text style={[localStyles.planFeature, { color: "#78350f" }]}>{f}</Text>
                     </View>
                   ))}
-                  <TouchableOpacity style={[localStyles.planBtn, { backgroundColor: "#b45309" }]}>
-                    <Text style={{ color: "#fff", fontWeight: "700" }}>Upgrade to Elite</Text>
+                  <TouchableOpacity
+                    style={[localStyles.planBtn, { backgroundColor: "#b45309", opacity: checkoutState === "pending" ? 0.6 : 1 }]}
+                    disabled={checkoutState === "pending" || tier === "elite"}
+                    onPress={() => { void startCheckout("elite"); }}
+                  >
+                    <Text style={{ color: "#fff", fontWeight: "700" }}>
+                      {tier === "elite" ? "Current Plan" : checkoutState === "pending" ? "Waiting for PayPal..." : "Upgrade to Elite"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
+                {checkoutState !== "idle" && (
+                  <View style={[localStyles.checkoutStateCard, { borderColor: colors.border }]}>
+                    <Text style={{ color: colors.text, fontWeight: "600" }}>
+                      {checkoutState === "pending"
+                        ? "PayPal checkout is in progress..."
+                        : checkoutState === "success"
+                          ? "Subscription update succeeded."
+                          : "Subscription update failed."}
+                    </Text>
+                    <Text style={{ color: colors.subtext, marginTop: 4 }}>Status: {status}</Text>
+                    {!!error && <Text style={{ color: "#dc2626", marginTop: 4 }}>{error}</Text>}
+                  </View>
+                )}
               </View>
             </View>
           </Modal>
@@ -1140,6 +1165,7 @@ const localStyles = StyleSheet.create({
   planFeatureRow: { flexDirection: "row", alignItems: "center", marginBottom: 4 },
   planFeature: { fontSize: 13, marginLeft: 6 },
   planBtn: { borderRadius: 8, paddingVertical: 10, alignItems: "center", marginTop: 10 },
+  checkoutStateCard: { marginTop: 12, borderWidth: 1, borderRadius: 10, padding: 10 },
   popularBadge: { backgroundColor: "#091556", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, alignSelf: "flex-start", marginBottom: 6 },
   callModal: { borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 20, maxHeight: "90%" },
   sheetHandle: { width: 40, height: 4, backgroundColor: "#E2E8F0", borderRadius: 2, alignSelf: "center", marginBottom: 16 },

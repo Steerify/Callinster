@@ -32,7 +32,7 @@ Notifications.setNotificationHandler({
 });
 
 export default function Profile() {
-  const { tier } = useSubscription();
+  const { tier, status, checkoutState, error, startCheckout } = useSubscription();
   const { user } = useUser();
   const { signOut } = useAuth();
   const { colors } = useTheme();
@@ -180,6 +180,21 @@ export default function Profile() {
           <Ionicons name="chevron-forward" size={20} color={isPremium ? "#7c3aed" : colors.primary} />
         </TouchableOpacity>
       )}
+      {checkoutState !== "idle" && (
+        <View style={[pStyles.subscriptionStateBanner, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Text style={{ color: colors.text, fontWeight: "600" }}>
+            {checkoutState === "pending"
+              ? "Processing PayPal checkout..."
+              : checkoutState === "success"
+                ? "Subscription updated successfully."
+                : "Subscription update failed."}
+          </Text>
+          <Text style={{ color: colors.subtext, marginTop: 4 }}>
+            Status: {status}
+          </Text>
+          {!!error && <Text style={{ color: "#dc2626", marginTop: 6 }}>{error}</Text>}
+        </View>
+      )}
 
       {/* Stats Row */}
       <View style={[pStyles.statsRow, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -251,9 +266,9 @@ export default function Profile() {
             </View>
             <ScrollView>
               {[
-                { name: "Basic", price: "Free", color: colors.subtext, bg: colors.card, features: ["5 contacts/day", "5 deletes/day", "Avoid prefixes"], btn: false },
-                { name: "Premium", price: "₦X/month", color: colors.primary, bg: "#eef2ff", features: ["Extended contacts", "10 deletes/day", "Advanced search", "Avoid prefixes"], btn: true },
-                { name: "Elite ⭐", price: "₦X/month", color: "#b45309", bg: "#fffbea", features: ["Unlimited contacts", "Unlimited deletes", "Favorites", "No ads", "Advanced search"], btn: true },
+                { name: "Basic", tier: "basic", price: "Free", color: colors.subtext, bg: colors.card, features: ["5 contacts/day", "5 deletes/day", "Avoid prefixes"], btn: false },
+                { name: "Premium", tier: "premium", price: "Configured via PayPal plan ID", color: colors.primary, bg: "#eef2ff", features: ["Extended contacts", "10 deletes/day", "Advanced search", "Avoid prefixes"], btn: true },
+                { name: "Elite ⭐", tier: "elite", price: "Configured via PayPal plan ID", color: "#b45309", bg: "#fffbea", features: ["Unlimited contacts", "Unlimited deletes", "Favorites", "No ads", "Advanced search"], btn: true },
               ].map((plan, i) => (
                 <View key={i} style={[pStyles.planBox, { backgroundColor: plan.bg, borderColor: plan.color }]}>
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
@@ -347,6 +362,7 @@ const pStyles = StyleSheet.create({
   tierPill: { marginTop: 10, backgroundColor: "rgba(255,255,255,0.18)", paddingHorizontal: 16, paddingVertical: 4, borderRadius: 20 },
   tierPillText: { color: "#ffffff", fontWeight: "600", fontSize: 13 },
   subCard: { marginHorizontal: 16, marginBottom: 12, borderRadius: 14, padding: 14, flexDirection: "row", alignItems: "center", borderWidth: 1.5 },
+  subscriptionStateBanner: { marginHorizontal: 16, marginBottom: 12, borderRadius: 12, borderWidth: 1, padding: 12 },
   subCardTitle: { fontSize: 15, fontWeight: "700" },
   statsRow: { marginHorizontal: 16, marginBottom: 12, borderRadius: 14, flexDirection: "row", borderWidth: 1, overflow: "hidden" },
   statItem: { flex: 1, paddingVertical: 14, alignItems: "center" },
