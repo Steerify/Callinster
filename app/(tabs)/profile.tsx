@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { COLORS } from "../../constants/theme";
 import NotificationSettings from "../components/NotificationSettings";
-import { useSubscription } from "../components/Subsceiption";
+import { useSubscription } from "../components/Subscription";
 import { useTheme } from "../contexts/ThemeContext";
 
 const eliteBg = require("../../assets/images/Callinsterlogo(1).jpg");

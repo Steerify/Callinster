@@ -20,7 +20,7 @@
   - `app/index.tsx` — redirects to login
   - `app/(auth)/login.tsx` — Clerk Google SSO and login animation
   - `app/(tabs)/index.tsx` — main home + scheduling, contact logic
-- `app/components/` — `Contact.tsx`, `Loader.tsx`, `ThemeSwitch.tsx`, `Subsceiption.tsx`
+- `app/components/` — `Contact.tsx`, `Loader.tsx`, `ThemeSwitch.tsx`, `Subscription.tsx`
 - `app/contexts/ThemeContext.tsx`
 - `constants/theme.ts`
 - `app.json` — Expo manifest & permissions
@@ -59,7 +59,7 @@
 - Connect flows: attempts deep link (e.g., `whatsapp://send`), otherwise opens web/store fallback via `getFallbackLink`.
 - Scheduling: uses `expo-notifications` to schedule reminders; scheduled calls are stored under `scheduledCalls` in AsyncStorage.
 - Theme: managed in `ThemeContext` and persisted in AsyncStorage under key `theme`.
-- Subscription: `app/components/Subsceiption.tsx` provides `useSubscription()` (local provider). Important: the provider is currently commented out in `app/_layout.tsx` which causes `useSubscription()` to use its default value.
+- Subscription: `app/components/Subscription.tsx` provides `useSubscription()` (local provider). Important: the provider is currently commented out in `app/_layout.tsx` which causes `useSubscription()` to use its default value.
 
 ---
 
@@ -79,7 +79,7 @@
 ## 6) Important notes & gotchas
 
 - Auth: Clerk SSO must be configured (publishable key + redirect URIs). The app relies on Clerk's `startSSOFlow({ strategy: 'oauth_google' })` for sign-in.
-- SubscriptionProvider: currently not wrapped in `app/_layout.tsx` (commented out). Because `Subsceiption.tsx` creates a default context value, the app acts like the user has the highest tier by default. To replicate production gating, enable the provider or integrate a real billing backend.
+- SubscriptionProvider: currently not wrapped in `app/_layout.tsx` (commented out). Because `Subscription.tsx` creates a default context value, the app acts like the user has the highest tier by default. To replicate production gating, enable the provider or integrate a real billing backend.
 - Notifications: test scheduled notifications on real device (background/killed state). On Android, create the notification channel and handle battery optimizations.
 - Data sensitivity: contact usernames and metadata are stored in AsyncStorage (not encrypted). Consider `expo-secure-store` for PII.
 

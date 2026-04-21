@@ -28,7 +28,7 @@ import { COLORS } from "../../constants/theme";
 import { styles } from "../../styles/feed.styles";
 import Contact from "../components/Contact";
 import Loader from "../components/Loader";
-import { useSubscription } from "../components/Subsceiption";
+import { useSubscription } from "../components/Subscription";
 import { ThemeSwitch } from "../components/ThemeSwitch";
 import Carousel from "../components/homePageCarousel";
 import { useTheme } from "../contexts/ThemeContext";

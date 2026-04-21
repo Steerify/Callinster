@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import Carousel from "../../components/Carousel";
 import Contact from "../../components/Contact";
-import { useSubscription } from "../../components/Subsceiption";
+import { useSubscription } from "../../components/Subscription";
 import { COLORS } from "../../constants/theme";
 import { useTheme } from "../../contexts/ThemeContext";
 
