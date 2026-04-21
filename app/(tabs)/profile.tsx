@@ -19,8 +19,6 @@ import NotificationSettings from "../components/NotificationSettings";
 import { useSubscription } from "../components/Subsceiption";
 import { useTheme } from "../contexts/ThemeContext";
 
-const eliteBg = require("../../assets/images/Callinsterlogo(1).jpg");
-const regularBg = require("../../assets/images/Callinsterlogo(2).jpg");
 const NOTIFICATION_CHANNEL_ID = "profile-notifications";
 
 Notifications.setNotificationHandler({
@@ -42,6 +40,7 @@ export default function Profile() {
   const [showPlanDetails, setShowPlanDetails] = useState(false);
   const [accountModalVisible, setAccountModalVisible] = useState(false);
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const userData = {
     name: user?.fullName || "Guest User",
@@ -54,14 +53,10 @@ export default function Profile() {
 
   const tierLabel = isElite ? "Elite ⭐" : isPremium ? "Premium" : "Basic";
   const tierColor = isElite ? "#b45309" : isPremium ? colors.primary : colors.subtext;
-  const tierBg = isElite ? "#fff8e1" : isPremium ? "#eef2ff" : colors.surfaceLight;
-  const isCheckoutPending = checkoutState === "pending";
-
-  const handleUpgrade = async (nextTier: "premium" | "elite") => {
-    await startCheckout(nextTier);
-  };
-
   useEffect(() => {
+    let notificationSub: Notifications.EventSubscription | undefined;
+    let responseSub: Notifications.EventSubscription | undefined;
+
     (async () => {
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== "granted") return;
@@ -74,11 +69,53 @@ export default function Profile() {
           enableVibrate: true,
         });
       }
-      const notifListener = Notifications.addNotificationReceivedListener(() => {});
-      const responseListener = Notifications.addNotificationResponseReceivedListener(() => {});
-      return () => { notifListener.remove(); responseListener.remove(); };
+      notificationSub = Notifications.addNotificationReceivedListener(() => {});
+      responseSub = Notifications.addNotificationResponseReceivedListener(() => {});
     })();
+
+    return () => {
+      notificationSub?.remove();
+      responseSub?.remove();
+    };
   }, []);
+
+  const openExternalUrl = async (url: string, failureMessage: string) => {
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (!canOpen) {
+        Alert.alert("Action unavailable", failureMessage);
+        return;
+      }
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert("Action failed", failureMessage);
+    }
+  };
+
+  const handleHelpPress = async () => {
+    await openExternalUrl("mailto:support@callinster.com", "We could not open your email app. Please email support@callinster.com manually.");
+  };
+
+  const handleUpgradePress = async (planName: "Premium" | "Elite") => {
+    const subject = encodeURIComponent(`Upgrade request: ${planName}`);
+    const body = encodeURIComponent(`Hi Callinster team,\n\nI want to upgrade to the ${planName} plan.\n\nAccount email: ${userData.email}`);
+    await openExternalUrl(
+      `mailto:support@callinster.com?subject=${subject}&body=${body}`,
+      "We could not start the upgrade flow. Please email support@callinster.com and mention your preferred plan."
+    );
+  };
+
+  const handleSignOut = async () => {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    try {
+      await signOut();
+    } catch {
+      Alert.alert("Sign out failed", "We could not sign you out right now. Please try again.");
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   const sendTestNotification = async () => {
     try {
@@ -102,7 +139,7 @@ export default function Profile() {
     { label: "Test Notifications", icon: "notifications-circle-outline", color: "#0ea5e9", onPress: sendTestNotification },
     { label: "Account", icon: "person-circle-outline", color: "#10b981", onPress: () => setAccountModalVisible(true) },
     { label: "Privacy", icon: "lock-closed-outline", color: "#f59e0b", onPress: () => setPrivacyModalVisible(true) },
-    { label: "Help & Support", icon: "help-circle-outline", color: "#6366f1", onPress: () => Linking.openURL("mailto:support@callinster.com") },
+    { label: "Help & Support", icon: "help-circle-outline", color: "#6366f1", onPress: handleHelpPress },
   ];
 
   return (
@@ -188,9 +225,13 @@ export default function Profile() {
       </View>
 
       {/* Sign Out */}
-      <TouchableOpacity style={[pStyles.signOutBtn, { backgroundColor: colors.surface, borderColor: "#fee2e2" }]} onPress={() => signOut()}>
+      <TouchableOpacity
+        style={[pStyles.signOutBtn, { backgroundColor: colors.surface, borderColor: "#fee2e2", opacity: isSigningOut ? 0.7 : 1 }]}
+        onPress={handleSignOut}
+        disabled={isSigningOut}
+      >
         <Ionicons name="log-out-outline" size={20} color="#ef4444" style={{ marginRight: 10 }} />
-        <Text style={{ fontSize: 16, color: "#ef4444", fontWeight: "600" }}>Sign Out</Text>
+        <Text style={{ fontSize: 16, color: "#ef4444", fontWeight: "600" }}>{isSigningOut ? "Signing Out..." : "Sign Out"}</Text>
       </TouchableOpacity>
 
       <View style={{ height: 40 }} />
@@ -242,13 +283,10 @@ export default function Profile() {
                   ))}
                   {plan.btn && (
                     <TouchableOpacity
-                      style={[pStyles.planUpgradeBtn, { backgroundColor: plan.color, opacity: isCheckoutPending ? 0.6 : 1 }]}
-                      disabled={isCheckoutPending || tier === plan.tier}
-                      onPress={() => handleUpgrade(plan.tier)}
+                      style={[pStyles.planUpgradeBtn, { backgroundColor: plan.color }]}
+                      onPress={() => handleUpgradePress(plan.name.includes("Elite") ? "Elite" : "Premium")}
                     >
-                      <Text style={{ color: "#fff", fontWeight: "700" }}>
-                        {tier === plan.tier ? "Current Plan" : isCheckoutPending ? "Waiting for PayPal..." : `Upgrade to ${plan.name.replace(" ⭐", "")}`}
-                      </Text>
+                      <Text style={{ color: "#fff", fontWeight: "700" }}>Upgrade to {plan.name.replace(" ⭐", "")}</Text>
                     </TouchableOpacity>
                   )}
                 </View>

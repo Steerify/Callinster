@@ -49,27 +49,73 @@ Join our community of developers creating universal apps.
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
 
-## PayPal subscription configuration
+## Android release (EAS + Gradle)
 
-Set the following environment variables (for example in `.env`) before testing subscription upgrades:
+### 1) Configured release settings
 
-- `EXPO_PUBLIC_API_BASE_URL`: Base URL for your backend API that proxies PayPal calls.
-- `EXPO_PUBLIC_PAYPAL_CLIENT_ID`: PayPal REST client ID (used by backend).
-- `PAYPAL_CLIENT_SECRET`: PayPal REST client secret (server-side only, never expose in app bundle).
-- `EXPO_PUBLIC_PAYPAL_PREMIUM_PLAN_ID`: PayPal plan ID for Premium tier.
-- `EXPO_PUBLIC_PAYPAL_ELITE_PLAN_ID`: PayPal plan ID for Elite tier.
-- `EXPO_PUBLIC_PAYPAL_ENVIRONMENT`: `sandbox` or `live`.
-- `PAYPAL_WEBHOOK_ID`: PayPal webhook ID used by backend signature verification.
-- `PAYPAL_WEBHOOK_URL`: Public backend endpoint URL receiving PayPal webhook events.
-- `EXPO_PUBLIC_PAYPAL_MOBILE_RETURN_URL`: Deep-link URL that PayPal should redirect to on successful approval.
-- `EXPO_PUBLIC_PAYPAL_MOBILE_CANCEL_URL`: Deep-link URL that PayPal should redirect to when user cancels.
+- **App config** (`app.config.js`)
+  - Android package is controlled by `ANDROID_APPLICATION_ID` (defaults to `com.callinster`).
+  - Android `versionCode` is controlled by `ANDROID_VERSION_CODE` (defaults to `1`).
+- **EAS profiles** (`eas.json`)
+  - `production-aab`: Google Play app bundle (`.aab`).
+  - `production-apk`: release APK (`.apk`).
+  - `local-release`: local Gradle-compatible store build using `credentialsSource: local`.
+- **Native Android signing** (`android/app/build.gradle`)
+  - Release signing uses Gradle properties:
+    - `CALLINSTER_UPLOAD_STORE_FILE`
+    - `CALLINSTER_UPLOAD_STORE_PASSWORD`
+    - `CALLINSTER_UPLOAD_KEY_ALIAS`
+    - `CALLINSTER_UPLOAD_KEY_PASSWORD`
+  - If these are absent, release build falls back to debug signing (safe for CI smoke builds, **not** Play Store distribution).
 
-### Required backend endpoints
+### 2) Validate current release configuration
 
-The mobile app now calls these backend integration points:
+```bash
+npx expo config --type public | rg -n '"android"|"package"|"versionCode"'
+./android/gradlew -p android :app:tasks --all | rg -n 'assembleRelease|bundleRelease'
+```
 
-- `POST /billing/paypal/subscriptions/create` → create PayPal subscription and return checkout URL.
-- `POST /billing/paypal/subscriptions/capture` → capture/activate approved subscription.
-- `GET /billing/subscription-status` → return webhook-driven subscription status for current user.
+### 3) Build commands (exact)
 
-`/billing/subscription-status` should read the latest tier/status from your server-side store (updated by PayPal webhooks) so the app can stay in sync across devices and app restarts.
+#### Cloud build with EAS
+
+```bash
+# AAB (Google Play)
+eas build --platform android --profile production-aab
+
+# APK (internal QA / sideload)
+eas build --platform android --profile production-apk
+```
+
+Artifact URLs appear:
+- In CLI output under **Build details** / **Install page** links.
+- On Expo dashboard project builds page (`https://expo.dev/accounts/<owner>/projects/<slug>/builds`).
+
+#### Local Gradle build (signed when secrets are provided)
+
+```bash
+cd android
+./gradlew clean
+./gradlew bundleRelease   # outputs .aab
+./gradlew assembleRelease # outputs .apk
+```
+
+Artifacts appear at:
+- `android/app/build/outputs/bundle/release/app-release.aab`
+- `android/app/build/outputs/apk/release/app-release.apk`
+
+### 4) If CI/local credentials are missing
+
+Minimal required secrets:
+- `CALLINSTER_UPLOAD_STORE_FILE` (path to keystore file)
+- `CALLINSTER_UPLOAD_STORE_PASSWORD`
+- `CALLINSTER_UPLOAD_KEY_ALIAS`
+- `CALLINSTER_UPLOAD_KEY_PASSWORD`
+- `EXPO_TOKEN` (for non-interactive EAS cloud builds)
+- `GOOGLE_SERVICES_FILE` (if Firebase config is required in build context)
+
+One-command path once secrets are supplied:
+
+```bash
+eas build --platform android --profile production-aab --non-interactive
+```
