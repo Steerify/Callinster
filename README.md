@@ -1,50 +1,187 @@
-# Welcome to your Expo app 👋
+# Callinster
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Callinster is an Expo + React Native app focused on helping users keep up with people in their contact list. It combines contacts access, one-tap communication links, scheduled call reminders, and a tiered feature model (Basic / Premium / Elite).
 
-## Get started
+## Feature overview
 
-1. Install dependencies
+### 1) Contacts feed (Home tab)
+- Loads device contacts with `expo-contacts` after permission is granted.
+- Supports filtering via:
+  - phone-number avoid prefixes (`avoidPrefixes`)
+  - name avoid prefixes (`avoidNamePrefixes`)
+- Shows a limited daily contact feed for non-Elite tiers and allows search/filter interactions.
+- Supports one-tap connect flows with deep links/fallback links for apps like Phone, WhatsApp, Telegram, Skype, Zoom, Teams, Messenger, Discord, and Snapchat.
 
-   ```bash
-   npm install
-   ```
+### 2) Favorites (Favorites tab)
+- Favorites are stored locally in AsyncStorage (`favoriteContacts`).
+- Elite users can view/manage favorites directly in the Favorites tab.
+- Non-Elite users see upgrade prompts instead of favorites management.
 
-2. Start the app
+### 3) Scheduled-call reminders
+- Users can schedule call reminders from the Home experience.
+- Reminders are scheduled with `expo-notifications` and persisted in AsyncStorage (`scheduledCalls`).
+- Android notification channels are configured in-app for reliable reminder delivery.
 
-   ```bash
-   npx expo start
-   ```
+### 4) Profile & settings
+- Uses Clerk user profile data (name, email, avatar).
+- Includes:
+  - Notification settings modal
+  - Notification test action
+  - Account and privacy info modals
+  - Sign out action
+- Theme state is managed with `ThemeContext` and persisted locally.
 
-In the output, you'll find options to open the app in a
+### 5) Tier gating
+- Tier model is `basic | premium | elite`.
+- Current gating in the UI includes differences in:
+  - visible favorites features
+  - delete/contact limits
+  - upgrade prompts and plan cards
+  - notification customization availability in settings
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+> Note: tier state is currently local context state, not a connected billing backend.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## Architecture
 
-When you're ready, run:
+### App structure
+- `app/_layout.tsx`: root providers (`ClerkProvider`, `ThemeProvider`) and splash/font setup.
+- `app/index.tsx`: redirects to auth flow.
+- `app/(auth)/login.tsx`: Google SSO sign-in with Clerk.
+- `app/(tabs)/_layout.tsx`: bottom tab navigator (Home, Favorites, Profile).
+- `app/(tabs)/index.tsx`: contacts feed + scheduling + reminders.
+- `app/(tabs)/notifications.tsx`: favorites and tier-gated upgrade UI.
+- `app/(tabs)/profile.tsx`: profile card, settings modals, notification actions.
+
+### State and persistence
+- **Auth/session**: Clerk (`@clerk/clerk-expo`).
+- **Device data APIs**: `expo-contacts`, `expo-notifications`, `expo-linking`.
+- **Local persistence**: AsyncStorage (favorites, scheduled calls, filters, preferences, counters).
+- **Theme**: app-level context with persisted mode.
+- **Tier**: local subscription context provider (`Subsceiption.tsx`).
+
+---
+
+## Required environment and configuration
+
+## 1) Clerk (required)
+Set this in your environment before launching:
 
 ```bash
-npm run reset-project
+EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=<your_clerk_publishable_key>
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+You also need Clerk OAuth configured for Google sign-in because login uses `startSSOFlow({ strategy: "oauth_google" })`.
 
-## Learn more
+## 2) Expo notifications (required for reminders)
+- Ensure your build includes `expo-notifications` plugin config (already present in `app.config.js`).
+- Grant notification permission on device when prompted.
+- On Android, channels are created at runtime (for example `call-notifications`, `profile-notifications`).
 
-To learn more about developing your project with Expo, look at the following resources:
+## 3) Android-specific config
+- Android permissions are declared in `app.config.js`:
+  - `NOTIFICATIONS`
+  - `SCHEDULE_EXACT_ALARM`
+  - `WAKE_LOCK`
+  - `READ_CONTACTS`
+- If you are using Firebase services with native Android builds, set:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+GOOGLE_SERVICES_FILE=<absolute_or_project_relative_path_to_google-services.json>
+```
 
-## Join the community
+## 4) PayPal placeholders
+- There is no active PayPal integration wired in this repository at the moment.
+- If you add one, define your own `EXPO_PUBLIC_PAYPAL_*` placeholders and document callback URLs and environment mode (sandbox/live) before shipping.
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Local development and build
+
+### Prerequisites
+- Node.js + npm
+- Android Studio (for emulator/native Android builds) and/or Xcode (for iOS)
+- Expo tooling (via `npx expo ...` commands)
+
+### Install
+```bash
+npm install
+```
+
+### Run dev client (matches current script)
+```bash
+npm run start
+```
+This runs `expo start --dev-client`.
+
+### Run Android native build + install
+```bash
+npm run android
+```
+
+### Run iOS native build + install
+```bash
+npm run ios
+```
+
+### Run web
+```bash
+npm run web
+```
+
+### Lint
+```bash
+npm run lint
+```
+
+> The `reset-project` npm script exists in `package.json` but points to a missing `scripts/reset-project.js` file in this repo, so it should be treated as non-functional unless restored.
+
+---
+
+## Known limitations
+
+1. **Tier/billing is local-only**
+   - Subscription tier behavior is currently app-state-driven and not connected to a real payment backend.
+
+2. **Notification reliability depends on device policy**
+   - OEM battery optimization (especially on Android) may delay or suppress scheduled notifications.
+
+3. **Permissions are mandatory for core workflows**
+   - Denied contacts permission blocks contacts feed.
+   - Denied notifications permission blocks reminder usefulness.
+
+4. **Holiday reminder behavior**
+   - Holiday notifications in settings are date-specific and only schedule for matching dates.
+
+5. **Template residue in scripts**
+   - `npm run reset-project` is a leftover script target and currently broken in this repository.
+
+---
+
+## Troubleshooting
+
+### Notifications do not fire
+1. Confirm app notification permission is granted in OS settings.
+2. On Android, ensure notification channels are enabled for the app.
+3. Disable battery optimization for Callinster (Android settings) to improve scheduled delivery.
+4. Test on a physical device; emulators can behave inconsistently with background notification delivery.
+
+### Contacts list is empty
+1. Confirm contacts permission is granted.
+2. Check whether your avoid-prefix filters are hiding most/all contacts.
+3. Pull-to-refresh or restart app after permission changes.
+
+### Login issues (Google SSO)
+1. Verify `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` is set.
+2. Confirm Google OAuth is configured in Clerk for your redirect URIs and build targets.
+3. Rebuild native dev client if auth/native config changed.
+
+---
+
+## Tech stack
+- Expo SDK 54 + React Native 0.81
+- Expo Router
+- Clerk Expo SDK
+- AsyncStorage
+- Expo Contacts / Notifications / Linking
