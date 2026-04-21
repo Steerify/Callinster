@@ -9,12 +9,12 @@ import {
     Modal,
     Platform,
     ScrollView,
-    StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from "react-native";
 import { COLORS } from "../../constants/theme";
+import { createProfileStyles } from "../../styles/profile.styles";
 import NotificationSettings from "../components/NotificationSettings";
 import { useSubscription } from "../components/Subsceiption";
 import { useTheme } from "../contexts/ThemeContext";
@@ -173,7 +173,7 @@ export default function Profile() {
             <Text style={[pStyles.subCardTitle, { color: isPremium ? "#7c3aed" : colors.primary }]}>
               {isPremium ? "Upgrade to Elite ⭐" : "Unlock More Features"}
             </Text>
-            <Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 2 }}>
+            <Text style={[pStyles.subCardSubtitle, { color: colors.textSecondary }]}>
               {isPremium ? "Get unlimited contacts, favorites & no ads" : "Upgrade to Premium or Elite for extra features"}
             </Text>
           </View>
@@ -234,7 +234,7 @@ export default function Profile() {
         <Text style={{ fontSize: 16, color: "#ef4444", fontWeight: "600" }}>{isSigningOut ? "Signing Out..." : "Sign Out"}</Text>
       </TouchableOpacity>
 
-      <View style={{ height: 40 }} />
+      <View style={pStyles.closeSpacer} />
 
       {/* Notification Settings Modal */}
       <Modal animationType="slide" transparent visible={notificationModalVisible} onRequestClose={() => setNotificationModalVisible(false)}>
@@ -248,7 +248,7 @@ export default function Profile() {
             </View>
             <NotificationSettings tier={tier} />
             <TouchableOpacity style={[pStyles.doneBtn, { backgroundColor: colors.primary }]} onPress={() => setNotificationModalVisible(false)}>
-              <Text style={{ color: "#fff", fontWeight: "700" }}>Done</Text>
+              <Text style={pStyles.doneBtnText}>Done</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -271,14 +271,14 @@ export default function Profile() {
                 { name: "Elite ⭐", tier: "elite", price: "Configured via PayPal plan ID", color: "#b45309", bg: "#fffbea", features: ["Unlimited contacts", "Unlimited deletes", "Favorites", "No ads", "Advanced search"], btn: true },
               ].map((plan, i) => (
                 <View key={i} style={[pStyles.planBox, { backgroundColor: plan.bg, borderColor: plan.color }]}>
-                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                  <View style={pStyles.modalHeader}>
                     <Text style={[pStyles.planName, { color: plan.color }]}>{plan.name}</Text>
-                    <Text style={{ color: plan.color, fontWeight: "600", fontSize: 13 }}>{plan.price}</Text>
+                    <Text style={[pStyles.planPrice, { color: plan.color }]}>{plan.price}</Text>
                   </View>
                   {plan.features.map(f => (
-                    <View key={f} style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
+                    <View key={f} style={pStyles.planFeatureRow}>
                       <Ionicons name="checkmark-circle" size={14} color={plan.color} />
-                      <Text style={{ color: colors.textSecondary, fontSize: 13, marginLeft: 6 }}>{f}</Text>
+                      <Text style={[pStyles.planFeatureText, { color: colors.textSecondary }]}>{f}</Text>
                     </View>
                   ))}
                   {plan.btn && (
@@ -306,18 +306,18 @@ export default function Profile() {
                 <Ionicons name="close" size={24} color={colors.subtext} />
               </TouchableOpacity>
             </View>
-            <View style={{ marginVertical: 10 }}>
-              <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 4 }}>Full Name</Text>
-              <Text style={{ color: colors.text, fontSize: 16, fontWeight: "500", marginBottom: 16 }}>{userData.name}</Text>
+            <View style={pStyles.accountBlock}>
+              <Text style={[pStyles.accountLabel, { color: colors.textSecondary }]}>Full Name</Text>
+              <Text style={[pStyles.accountValue, { color: colors.text }]}>{userData.name}</Text>
               
-              <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 4 }}>Email Address</Text>
-              <Text style={{ color: colors.text, fontSize: 16, fontWeight: "500", marginBottom: 16 }}>{userData.email}</Text>
+              <Text style={[pStyles.accountLabel, { color: colors.textSecondary }]}>Email Address</Text>
+              <Text style={[pStyles.accountValue, { color: colors.text }]}>{userData.email}</Text>
               
-              <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 4 }}>Current Plan</Text>
-              <Text style={{ color: colors.primary, fontSize: 16, fontWeight: "700" }}>{tierLabel}</Text>
+              <Text style={[pStyles.accountLabel, { color: colors.textSecondary }]}>Current Plan</Text>
+              <Text style={[pStyles.accountValue, { color: colors.primary, marginBottom: 0, fontWeight: "700" }]}>{tierLabel}</Text>
             </View>
             <TouchableOpacity style={[pStyles.doneBtn, { backgroundColor: colors.primary, marginTop: 24 }]} onPress={() => setAccountModalVisible(false)}>
-              <Text style={{ color: "#fff", fontWeight: "700" }}>Close</Text>
+              <Text style={pStyles.doneBtnText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -333,7 +333,7 @@ export default function Profile() {
                 <Ionicons name="close" size={24} color={colors.subtext} />
               </TouchableOpacity>
             </View>
-            <Text style={{ color: colors.textSecondary, marginBottom: 16, lineHeight: 22 }}>
+            <Text style={[pStyles.privacyText, { color: colors.textSecondary }]}>
               Your privacy is extremely important to us. 
               {"\n\n"}
               • Callinster only requests contacts access strictly for scheduling calls on your device. {"\n"}
@@ -341,7 +341,7 @@ export default function Profile() {
               • All scheduled notifications and call metadata remain on your phone.
             </Text>
             <TouchableOpacity style={[pStyles.doneBtn, { backgroundColor: colors.primary }]} onPress={() => setPrivacyModalVisible(false)}>
-              <Text style={{ color: "#fff", fontWeight: "700" }}>Understood</Text>
+              <Text style={pStyles.doneBtnText}>Understood</Text>
             </TouchableOpacity>
           </View>
         </View>
