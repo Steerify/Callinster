@@ -1,10 +1,11 @@
 import { Dimensions, StyleSheet } from "react-native";
+import { radius, spacing, typography } from "./tokens";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 export const carouselStyles = StyleSheet.create({
   carouselContainer: {
-    marginVertical: 20,
+    marginVertical: spacing.lg,
     height: 120,
     overflow: "hidden",
   },
@@ -12,9 +13,9 @@ export const carouselStyles = StyleSheet.create({
     width: SCREEN_WIDTH * 0.83,
     marginHorizontal: SCREEN_WIDTH * 0.04,
     height: 100,
-    borderRadius: 16,
+    borderRadius: radius.lg,
     justifyContent: "center",
-    padding: 16,
+    padding: spacing.md,
     backgroundColor: "#1E254B",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -22,39 +23,29 @@ export const carouselStyles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  itemContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  icon: {
-    marginRight: 16,
-  },
-  textContainer: {
-    flex: 1,
-  },
+  itemContent: { flexDirection: "row", alignItems: "center" },
+  icon: { marginRight: spacing.md },
+  textContainer: { flex: 1 },
   title: {
-    fontWeight: "bold",
-    fontSize: 16,
+    ...typography.titleSmall,
     color: "#FFFFFF",
-    marginBottom: 4,
+    marginBottom: spacing.xxs,
   },
   subtitle: {
-    fontSize: 14,
+    ...typography.body,
     color: "#D0D7F5",
   },
   pagination: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: spacing.xs,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: spacing.xs,
+    height: spacing.xs,
+    borderRadius: spacing.xxs,
     backgroundColor: "#5A38F5",
-    marginHorizontal: 4,
+    marginHorizontal: spacing.xxs,
   },
 });
-
-

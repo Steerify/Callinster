@@ -9,18 +9,16 @@ import {
     Modal,
     Platform,
     ScrollView,
-    StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from "react-native";
 import { COLORS } from "../../constants/theme";
+import { createProfileStyles } from "../../styles/profile.styles";
 import NotificationSettings from "../components/NotificationSettings";
 import { useSubscription } from "../components/Subsceiption";
 import { useTheme } from "../contexts/ThemeContext";
 
-const eliteBg = require("../../assets/images/Callinsterlogo(1).jpg");
-const regularBg = require("../../assets/images/Callinsterlogo(2).jpg");
 const NOTIFICATION_CHANNEL_ID = "profile-notifications";
 
 Notifications.setNotificationHandler({
@@ -42,6 +40,7 @@ export default function Profile() {
   const [showPlanDetails, setShowPlanDetails] = useState(false);
   const [accountModalVisible, setAccountModalVisible] = useState(false);
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const pStyles = createProfileStyles();
 
   const userData = {
     name: user?.fullName || "Guest User",
@@ -54,7 +53,6 @@ export default function Profile() {
 
   const tierLabel = isElite ? "Elite ⭐" : isPremium ? "Premium" : "Basic";
   const tierColor = isElite ? "#b45309" : isPremium ? colors.primary : colors.subtext;
-  const tierBg = isElite ? "#fff8e1" : isPremium ? "#eef2ff" : colors.surfaceLight;
 
   useEffect(() => {
     (async () => {
@@ -131,7 +129,7 @@ export default function Profile() {
             <Text style={[pStyles.subCardTitle, { color: isPremium ? "#7c3aed" : colors.primary }]}>
               {isPremium ? "Upgrade to Elite ⭐" : "Unlock More Features"}
             </Text>
-            <Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 2 }}>
+            <Text style={[pStyles.subCardSubtitle, { color: colors.textSecondary }]}>
               {isPremium ? "Get unlimited contacts, favorites & no ads" : "Upgrade to Premium or Elite for extra features"}
             </Text>
           </View>
@@ -170,10 +168,10 @@ export default function Profile() {
       {/* Sign Out */}
       <TouchableOpacity style={[pStyles.signOutBtn, { backgroundColor: colors.surface, borderColor: "#fee2e2" }]} onPress={() => signOut()}>
         <Ionicons name="log-out-outline" size={20} color="#ef4444" style={{ marginRight: 10 }} />
-        <Text style={{ fontSize: 16, color: "#ef4444", fontWeight: "600" }}>Sign Out</Text>
+        <Text style={[pStyles.signOutText, { color: "#ef4444" }]}>Sign Out</Text>
       </TouchableOpacity>
 
-      <View style={{ height: 40 }} />
+      <View style={pStyles.closeSpacer} />
 
       {/* Notification Settings Modal */}
       <Modal animationType="slide" transparent visible={notificationModalVisible} onRequestClose={() => setNotificationModalVisible(false)}>
@@ -187,7 +185,7 @@ export default function Profile() {
             </View>
             <NotificationSettings tier={tier} />
             <TouchableOpacity style={[pStyles.doneBtn, { backgroundColor: colors.primary }]} onPress={() => setNotificationModalVisible(false)}>
-              <Text style={{ color: "#fff", fontWeight: "700" }}>Done</Text>
+              <Text style={pStyles.doneBtnText}>Done</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -210,19 +208,19 @@ export default function Profile() {
                 { name: "Elite ⭐", price: "₦X/month", color: "#b45309", bg: "#fffbea", features: ["Unlimited contacts", "Unlimited deletes", "Favorites", "No ads", "Advanced search"], btn: true },
               ].map((plan, i) => (
                 <View key={i} style={[pStyles.planBox, { backgroundColor: plan.bg, borderColor: plan.color }]}>
-                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                  <View style={pStyles.modalHeader}>
                     <Text style={[pStyles.planName, { color: plan.color }]}>{plan.name}</Text>
-                    <Text style={{ color: plan.color, fontWeight: "600", fontSize: 13 }}>{plan.price}</Text>
+                    <Text style={[pStyles.planPrice, { color: plan.color }]}>{plan.price}</Text>
                   </View>
                   {plan.features.map(f => (
-                    <View key={f} style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
+                    <View key={f} style={pStyles.planFeatureRow}>
                       <Ionicons name="checkmark-circle" size={14} color={plan.color} />
-                      <Text style={{ color: colors.textSecondary, fontSize: 13, marginLeft: 6 }}>{f}</Text>
+                      <Text style={[pStyles.planFeatureText, { color: colors.textSecondary }]}>{f}</Text>
                     </View>
                   ))}
                   {plan.btn && (
                     <TouchableOpacity style={[pStyles.planUpgradeBtn, { backgroundColor: plan.color }]}>
-                      <Text style={{ color: "#fff", fontWeight: "700" }}>Upgrade to {plan.name.replace(" ⭐", "")}</Text>
+                      <Text style={pStyles.doneBtnText}>Upgrade to {plan.name.replace(" ⭐", "")}</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -242,18 +240,18 @@ export default function Profile() {
                 <Ionicons name="close" size={24} color={colors.subtext} />
               </TouchableOpacity>
             </View>
-            <View style={{ marginVertical: 10 }}>
-              <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 4 }}>Full Name</Text>
-              <Text style={{ color: colors.text, fontSize: 16, fontWeight: "500", marginBottom: 16 }}>{userData.name}</Text>
+            <View style={pStyles.accountBlock}>
+              <Text style={[pStyles.accountLabel, { color: colors.textSecondary }]}>Full Name</Text>
+              <Text style={[pStyles.accountValue, { color: colors.text }]}>{userData.name}</Text>
               
-              <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 4 }}>Email Address</Text>
-              <Text style={{ color: colors.text, fontSize: 16, fontWeight: "500", marginBottom: 16 }}>{userData.email}</Text>
+              <Text style={[pStyles.accountLabel, { color: colors.textSecondary }]}>Email Address</Text>
+              <Text style={[pStyles.accountValue, { color: colors.text }]}>{userData.email}</Text>
               
-              <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 4 }}>Current Plan</Text>
-              <Text style={{ color: colors.primary, fontSize: 16, fontWeight: "700" }}>{tierLabel}</Text>
+              <Text style={[pStyles.accountLabel, { color: colors.textSecondary }]}>Current Plan</Text>
+              <Text style={[pStyles.accountValue, { color: colors.primary, marginBottom: 0, fontWeight: "700" }]}>{tierLabel}</Text>
             </View>
             <TouchableOpacity style={[pStyles.doneBtn, { backgroundColor: colors.primary, marginTop: 24 }]} onPress={() => setAccountModalVisible(false)}>
-              <Text style={{ color: "#fff", fontWeight: "700" }}>Close</Text>
+              <Text style={pStyles.doneBtnText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -269,7 +267,7 @@ export default function Profile() {
                 <Ionicons name="close" size={24} color={colors.subtext} />
               </TouchableOpacity>
             </View>
-            <Text style={{ color: colors.textSecondary, marginBottom: 16, lineHeight: 22 }}>
+            <Text style={[pStyles.privacyText, { color: colors.textSecondary }]}>
               Your privacy is extremely important to us. 
               {"\n\n"}
               • Callinster only requests contacts access strictly for scheduling calls on your device. {"\n"}
@@ -277,7 +275,7 @@ export default function Profile() {
               • All scheduled notifications and call metadata remain on your phone.
             </Text>
             <TouchableOpacity style={[pStyles.doneBtn, { backgroundColor: colors.primary }]} onPress={() => setPrivacyModalVisible(false)}>
-              <Text style={{ color: "#fff", fontWeight: "700" }}>Understood</Text>
+              <Text style={pStyles.doneBtnText}>Understood</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -285,36 +283,3 @@ export default function Profile() {
     </ScrollView>
   );
 }
-
-const pStyles = StyleSheet.create({
-  screen: { flex: 1 },
-  headerCard: { paddingTop: 56, paddingBottom: 28, alignItems: "center", marginBottom: 16 },
-  avatarWrap: { position: "relative", marginBottom: 12 },
-  avatar: { width: 88, height: 88, borderRadius: 44, borderWidth: 3 },
-  avatarPlaceholder: { width: 88, height: 88, borderRadius: 44, backgroundColor: "#e6eaf7", borderWidth: 3, alignItems: "center", justifyContent: "center" },
-  tierBadge: { position: "absolute", bottom: 4, right: 4, width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#fff" },
-  profileName: { color: "#ffffff", fontSize: 22, fontWeight: "700", letterSpacing: 0.3 },
-  profileEmail: { color: "rgba(255,255,255,0.75)", fontSize: 14, marginTop: 4 },
-  tierPill: { marginTop: 10, backgroundColor: "rgba(255,255,255,0.18)", paddingHorizontal: 16, paddingVertical: 4, borderRadius: 20 },
-  tierPillText: { color: "#ffffff", fontWeight: "600", fontSize: 13 },
-  subCard: { marginHorizontal: 16, marginBottom: 12, borderRadius: 14, padding: 14, flexDirection: "row", alignItems: "center", borderWidth: 1.5 },
-  subCardTitle: { fontSize: 15, fontWeight: "700" },
-  statsRow: { marginHorizontal: 16, marginBottom: 12, borderRadius: 14, flexDirection: "row", borderWidth: 1, overflow: "hidden" },
-  statItem: { flex: 1, paddingVertical: 14, alignItems: "center" },
-  statValue: { fontSize: 18, fontWeight: "700" },
-  statLabel: { fontSize: 11, marginTop: 2, fontWeight: "500" },
-  section: { marginHorizontal: 16, marginBottom: 12, borderRadius: 14, padding: 16, borderWidth: 1 },
-  sectionTitle: { fontSize: 16, fontWeight: "700", marginBottom: 12 },
-  settingRow: { flexDirection: "row", alignItems: "center", paddingVertical: 12 },
-  settingIconWrap: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center", marginRight: 12 },
-  settingLabel: { flex: 1, fontSize: 15 },
-  signOutBtn: { marginHorizontal: 16, marginBottom: 12, borderRadius: 14, padding: 16, flexDirection: "row", alignItems: "center", borderWidth: 1 },
-  modalOverlay: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" },
-  modalCard: { width: "92%", borderRadius: 20, padding: 20, maxHeight: "88%" },
-  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  modalTitle: { fontSize: 18, fontWeight: "700" },
-  doneBtn: { borderRadius: 12, paddingVertical: 14, alignItems: "center", marginTop: 16 },
-  planBox: { borderRadius: 14, padding: 14, marginBottom: 12, borderWidth: 1.5 },
-  planName: { fontSize: 16, fontWeight: "700" },
-  planUpgradeBtn: { borderRadius: 8, paddingVertical: 10, alignItems: "center", marginTop: 10 },
-});
