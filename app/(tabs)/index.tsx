@@ -26,12 +26,14 @@ import { Drawer } from "react-native-drawer-layout";
 import CallinsterCarousel from "../../components/aboutCallinster";
 import { COLORS } from "../../constants/theme";
 import { styles } from "../../styles/feed.styles";
+import { logReminderDiagnostics } from "../../utils/reminderDiagnostics";
 import Contact from "../components/Contact";
 import Loader from "../components/Loader";
 import { useSubscription } from "../components/Subsceiption";
 import { ThemeSwitch } from "../components/ThemeSwitch";
 import Carousel from "../components/homePageCarousel";
 import { useTheme } from "../contexts/ThemeContext";
+import { cleanContact, isValidScheduledCallTime, isWithinDailyDeleteLimit } from "./callHelpers";
 
 type MyContact = {
   id: string;
@@ -51,6 +53,11 @@ type ScheduledCall = {
   contact: string;
   app: string;
   time: string;
+  timeLocal: string;
+  timezone: string;
+  timezoneOffsetMinutes: number;
+  scheduledAt: string;
+  targetEpochMs: number;
   notificationId: string;
 };
 
@@ -78,15 +85,6 @@ const callingApps: CallingApp[] = [
   { id: "discord", name: "Discord", icon: "game-controller-outline", requiresUsername: true },
   { id: "snapchat", name: "Snapchat", icon: "camera-outline", requiresUsername: true },
 ];
-
-const cleanContact = (contact: string, isUsername: boolean): string => {
-  if (isUsername) return contact.trim();
-  let phone = contact.replace(/[^\d+]/g, "");
-  if (!phone.startsWith("+")) {
-    if (/^0\d{7,10}$/.test(phone)) phone = "+234" + phone.substring(1);
-  }
-  return phone;
-};
 
 const getFallbackLink = (appId: string, contact: string): string => {
   const cleaned = cleanContact(contact, callingApps.some(a => a.id === appId && a.requiresUsername));
@@ -138,6 +136,8 @@ const formatDisplayDateTime = (date: Date): string =>
   date.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true });
 
 const formatAppName = (appId: string) => callingApps.find(a => a.id === appId)?.name || "Unknown App";
+const SCHEDULED_CALLS_STORAGE_KEY = "scheduledCalls";
+const CALL_NOTIFICATION_CHANNEL_ID = "call-notifications";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -171,7 +171,7 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [showSubModal, setShowSubModal] = useState(false);
   const [showPlanDetails, setShowPlanDetails] = useState(false);
-  const { tier } = useSubscription();
+  const { tier, status, checkoutState, error, startCheckout } = useSubscription();
   const [favoriteContacts, setFavoriteContacts] = useState<MyContact[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
@@ -215,6 +215,30 @@ export default function Index() {
     return combined;
   };
 
+  const getDateTrigger = (callTime: Date): Notifications.NotificationTriggerInput => ({
+    type: Notifications.SchedulableTriggerInputTypes.DATE,
+    date: callTime,
+    ...(Platform.OS === "android" ? { channelId: CALL_NOTIFICATION_CHANNEL_ID } : {}),
+  });
+
+  const saveScheduledCalls = useCallback(async (calls: ScheduledCall[]) => {
+    setScheduledCalls(calls);
+    await AsyncStorage.setItem(SCHEDULED_CALLS_STORAGE_KEY, JSON.stringify(calls));
+  }, []);
+
+  const runReminderDiagnostics = useCallback(async (calls: ScheduledCall[]) => {
+    await logReminderDiagnostics(
+      calls.map(call => ({
+        notificationId: call.notificationId,
+        targetEpochMs: call.targetEpochMs,
+        targetTimeIso: call.time,
+        targetTimeLocal: call.timeLocal,
+        timezone: call.timezone,
+      })),
+      CALL_NOTIFICATION_CHANNEL_ID
+    );
+  }, []);
+
   const setupNotifications = async () => {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -227,10 +251,12 @@ export default function Index() {
       return false;
     }
     if (Platform.OS === "android") {
-      await Notifications.setNotificationChannelAsync("call-notifications", {
+      await Notifications.setNotificationChannelAsync(CALL_NOTIFICATION_CHANNEL_ID, {
         name: "Call Notifications",
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
+        enableVibrate: true,
+        sound: "default",
       });
     }
     return true;
@@ -341,12 +367,12 @@ export default function Index() {
         const updatedCalls = scheduledCalls.filter(
           call => call.notificationId !== response.notification.request.identifier
         );
-        setScheduledCalls(updatedCalls);
-        await AsyncStorage.setItem("scheduledCalls", JSON.stringify(updatedCalls));
+        await saveScheduledCalls(updatedCalls);
+        await runReminderDiagnostics(updatedCalls);
       }
     });
     return () => { subscription.remove(); };
-  }, [scheduledCalls, initiateCall]);
+  }, [scheduledCalls, initiateCall, saveScheduledCalls, runReminderDiagnostics]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -355,8 +381,15 @@ export default function Index() {
       try {
         const favorites = await AsyncStorage.getItem("favoriteContacts");
         if (favorites) setFavoriteContacts(JSON.parse(favorites));
-        const calls = await AsyncStorage.getItem("scheduledCalls");
-        if (calls) setScheduledCalls(JSON.parse(calls));
+        const calls = await AsyncStorage.getItem(SCHEDULED_CALLS_STORAGE_KEY);
+        if (calls) {
+          const parsedCalls = JSON.parse(calls) as ScheduledCall[];
+          const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+          const scheduledIds = new Set(scheduledNotifications.map(notification => notification.identifier));
+          const restoredCalls = parsedCalls.filter(call => scheduledIds.has(call.notificationId));
+          await saveScheduledCalls(restoredCalls);
+          await runReminderDiagnostics(restoredCalls);
+        }
         const prefixes = await AsyncStorage.getItem("avoidPrefixes");
         if (prefixes) setAvoidPrefixes(JSON.parse(prefixes));
         const namePrefixes = await AsyncStorage.getItem("avoidNamePrefixes");
@@ -382,7 +415,7 @@ export default function Index() {
       }
     });
     return () => { notifSub.remove(); };
-  }, [initiateCall]);
+  }, [initiateCall, runReminderDiagnostics, saveScheduledCalls]);
 
   // Load contacts and pick 5 (with 1-3 favorites included)
   useEffect(() => {
@@ -453,62 +486,90 @@ export default function Index() {
     })();
   }, [avoidPrefixes, avoidNamePrefixes]);
 
+  const createScheduledReminder = useCallback(async (
+    reminderContact: string,
+    appId: string,
+    callTime: Date
+  ) => {
+    const app = callingApps.find(a => a.id === appId);
+    if (!app) {
+      Alert.alert("Error", "Invalid calling app selected");
+      return false;
+    }
+    const permissionsGranted = await setupNotifications();
+    if (!permissionsGranted) return false;
+
+    const bufferTime = new Date(Date.now() + 60000);
+    if (callTime <= bufferTime) {
+      Alert.alert("Error", "Please select a future time (at least 1 minute from now)");
+      return false;
+    }
+
+    try {
+      const cleanedContact = cleanContact(reminderContact, app.requiresUsername || false);
+      const localTargetTime = callTime.toLocaleString();
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const notificationId = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `Time to call ${reminderContact}`,
+          body: `Scheduled call via ${app.name}`,
+          data: { app: appId, contact: cleanedContact, type: "scheduled-call" },
+          sound: true,
+        },
+        trigger: getDateTrigger(callTime),
+      });
+      const callData: ScheduledCall = {
+        id: Date.now().toString(),
+        contact: reminderContact,
+        app: appId,
+        time: callTime.toISOString(),
+        timeLocal: localTargetTime,
+        timezone,
+        timezoneOffsetMinutes: callTime.getTimezoneOffset(),
+        scheduledAt: new Date().toISOString(),
+        targetEpochMs: callTime.getTime(),
+        notificationId,
+      };
+      const updatedCalls = [...scheduledCalls, callData];
+      await saveScheduledCalls(updatedCalls);
+      await runReminderDiagnostics(updatedCalls);
+      return true;
+    } catch (error) {
+      console.error("Failed to schedule reminder:", error);
+      Alert.alert("Error", "Failed to schedule call. Please try again.");
+      return false;
+    }
+  }, [scheduledCalls, saveScheduledCalls, runReminderDiagnostics]);
+
   const scheduleCall = async () => {
     if (!contactInput || !selectedApp) {
       Alert.alert("Error", "Please enter a contact and select a calling app");
       return;
     }
-    const app = callingApps.find(a => a.id === selectedApp);
-    if (!app) { Alert.alert("Error", "Invalid calling app selected"); return; }
-    const permissionsGranted = await setupNotifications();
-    if (!permissionsGranted) return;
     const callTime = getCombinedDateTime();
-    const bufferTime = new Date(Date.now() + 60000);
-    if (callTime <= bufferTime) {
-      Alert.alert("Error", "Please select a future time (at least 1 minute from now)");
-      return;
-    }
     setIsScheduling(true);
-    try {
-      const cleanedContact = cleanContact(contactInput, app.requiresUsername || false);
-      const notificationId = await Notifications.scheduleNotificationAsync({
-        content: {
-          title: `Time to call ${contactInput}`,
-          body: `Scheduled call via ${app.name}`,
-          data: { app: selectedApp, contact: cleanedContact, type: "scheduled-call" },
-          sound: true,
-        },
-        trigger: callTime,
-      });
-      const callData: ScheduledCall = {
-        id: Date.now().toString(),
-        contact: contactInput,
-        app: selectedApp,
-        time: callTime.toISOString(),
-        notificationId,
-      };
-      const updatedCalls = [...scheduledCalls, callData];
-      setScheduledCalls(updatedCalls);
-      await AsyncStorage.setItem("scheduledCalls", JSON.stringify(updatedCalls));
+    const created = await createScheduledReminder(contactInput, selectedApp, callTime);
+    if (created) {
       setCallModalVisible(false);
       Alert.alert("Success ✓", `Call scheduled for ${formatDisplayDateTime(callTime)}`);
-    } catch (error) {
-      Alert.alert("Error", "Failed to schedule call. Please try again.");
-    } finally {
+    }
+    if (created) {
       setIsScheduling(false);
       setContactInput("");
       setSelectedApp(null);
       setDate(new Date());
       setTime(new Date());
+      return;
     }
+    setIsScheduling(false);
   };
 
   const cancelScheduledCall = async (scheduledCall: ScheduledCall) => {
     try {
       await Notifications.cancelScheduledNotificationAsync(scheduledCall.notificationId);
       const updatedCalls = scheduledCalls.filter(call => call.id !== scheduledCall.id);
-      setScheduledCalls(updatedCalls);
-      await AsyncStorage.setItem("scheduledCalls", JSON.stringify(updatedCalls));
+      await saveScheduledCalls(updatedCalls);
+      await runReminderDiagnostics(updatedCalls);
       Alert.alert("Cancelled", "Scheduled call removed");
     } catch (error) {
       Alert.alert("Error", "Failed to cancel scheduled call");
@@ -527,12 +588,23 @@ export default function Index() {
   const showDatepicker = () => { setMode("date"); setShowDatePicker(true); };
   const showTimepicker = () => { setMode("time"); setShowTimePicker(true); };
 
+  const openReminderForContact = (contact: MyContact) => {
+    const firstPhone = contact.phoneNumbers?.[0]?.number?.trim() ?? "";
+    const prefilledContact = firstPhone || contact.name;
+    const now = new Date();
+    const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+
+    setContactPickerMode("manual");
+    setSelectedApp("phone");
+    setContactInput(prefilledContact);
+    setDate(oneHourFromNow);
+    setTime(oneHourFromNow);
+    setCallModalVisible(true);
+  };
+
   async function handleDelete(id: string): Promise<void> {
-    let limit = 5;
-    if (tier === "premium") limit = 10;
-    if (tier === "elite") limit = Infinity;
     const deletesToday = await getCounter("deletes");
-    if (deletesToday >= limit) { setShowSubModal(true); return; }
+    if (!isWithinDailyDeleteLimit(deletesToday, tier)) { setShowSubModal(true); return; }
     await incrementCounter("deletes");
     const updated = fiveContacts.filter(contact => contact.id !== id);
     const currentFavsInUpdated = updated.filter(u => favoriteContacts.some(fc => fc.id === u.id)).length;
@@ -587,6 +659,12 @@ export default function Index() {
     } else {
       setFilteredContacts([]);
     }
+  };
+
+  const handleContactReminderAction = (selectedContact: MyContact) => {
+    setContactInput(selectedContact.phoneNumbers?.[0]?.number || "");
+    setContactSearchQuery("");
+    setContactPickerMode("manual");
   };
 
   const savePreferences = async (newPreferences: WeeklyPreferences) => {
@@ -820,7 +898,7 @@ export default function Index() {
               <View style={[localStyles.upgradeCard, { backgroundColor: colors.surface }]}>
                 <Text style={[localStyles.upgradeTitle, { color: colors.primary }]}>Daily Limit Reached</Text>
                 <Text style={{ color: colors.textSecondary, marginBottom: 20, textAlign: "center" }}>
-                  You've reached your daily delete limit. Upgrade for more!
+                  You&apos;ve reached your daily delete limit. Upgrade for more!
                 </Text>
                 <TouchableOpacity
                   style={[localStyles.upgradePrimaryBtn, { backgroundColor: colors.primary }]}
@@ -873,8 +951,14 @@ export default function Index() {
                       <Text style={[localStyles.planFeature, { color: colors.textSecondary }]}>{f}</Text>
                     </View>
                   ))}
-                  <TouchableOpacity style={[localStyles.planBtn, { backgroundColor: colors.primary }]}>
-                    <Text style={{ color: "#fff", fontWeight: "700" }}>Upgrade to Premium</Text>
+                  <TouchableOpacity
+                    style={[localStyles.planBtn, { backgroundColor: colors.primary, opacity: checkoutState === "pending" ? 0.6 : 1 }]}
+                    disabled={checkoutState === "pending" || tier === "premium"}
+                    onPress={() => { void startCheckout("premium"); }}
+                  >
+                    <Text style={{ color: "#fff", fontWeight: "700" }}>
+                      {tier === "premium" ? "Current Plan" : checkoutState === "pending" ? "Waiting for PayPal..." : "Upgrade to Premium"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
 
@@ -887,10 +971,29 @@ export default function Index() {
                       <Text style={[localStyles.planFeature, { color: "#78350f" }]}>{f}</Text>
                     </View>
                   ))}
-                  <TouchableOpacity style={[localStyles.planBtn, { backgroundColor: "#b45309" }]}>
-                    <Text style={{ color: "#fff", fontWeight: "700" }}>Upgrade to Elite</Text>
+                  <TouchableOpacity
+                    style={[localStyles.planBtn, { backgroundColor: "#b45309", opacity: checkoutState === "pending" ? 0.6 : 1 }]}
+                    disabled={checkoutState === "pending" || tier === "elite"}
+                    onPress={() => { void startCheckout("elite"); }}
+                  >
+                    <Text style={{ color: "#fff", fontWeight: "700" }}>
+                      {tier === "elite" ? "Current Plan" : checkoutState === "pending" ? "Waiting for PayPal..." : "Upgrade to Elite"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
+                {checkoutState !== "idle" && (
+                  <View style={[localStyles.checkoutStateCard, { borderColor: colors.border }]}>
+                    <Text style={{ color: colors.text, fontWeight: "600" }}>
+                      {checkoutState === "pending"
+                        ? "PayPal checkout is in progress..."
+                        : checkoutState === "success"
+                          ? "Subscription update succeeded."
+                          : "Subscription update failed."}
+                    </Text>
+                    <Text style={{ color: colors.subtext, marginTop: 4 }}>Status: {status}</Text>
+                    {!!error && <Text style={{ color: "#dc2626", marginTop: 4 }}>{error}</Text>}
+                  </View>
+                )}
               </View>
             </View>
           </Modal>
@@ -922,6 +1025,7 @@ export default function Index() {
                     key={contact.id}
                     contact={contact}
                     onDelete={() => { void handleDelete(contact.id); }}
+                    onScheduleReminder={openReminderForContact}
                     showHeart={tier === "elite"}
                     weeklyPreferences={weeklyPreferences}
                   />
@@ -1000,7 +1104,7 @@ export default function Index() {
                         <TouchableOpacity
                           key={contact.id}
                           style={[localStyles.contactDropdownItem, { borderBottomColor: colors.divider }]}
-                          onPress={() => { setContactInput(contact.phoneNumbers?.[0]?.number || ""); setContactSearchQuery(""); setContactPickerMode("manual"); }}
+                          onPress={() => handleContactReminderAction(contact)}
                         >
                           <View style={[localStyles.miniAvatar, { backgroundColor: getAvatarColor(contact.name) }]}>
                             <Text style={{ color: "#fff", fontWeight: "700", fontSize: 14 }}>{contact.name.charAt(0).toUpperCase()}</Text>
@@ -1140,6 +1244,7 @@ const localStyles = StyleSheet.create({
   planFeatureRow: { flexDirection: "row", alignItems: "center", marginBottom: 4 },
   planFeature: { fontSize: 13, marginLeft: 6 },
   planBtn: { borderRadius: 8, paddingVertical: 10, alignItems: "center", marginTop: 10 },
+  checkoutStateCard: { marginTop: 12, borderWidth: 1, borderRadius: 10, padding: 10 },
   popularBadge: { backgroundColor: "#091556", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, alignSelf: "flex-start", marginBottom: 6 },
   callModal: { borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 20, maxHeight: "90%" },
   sheetHandle: { width: 40, height: 4, backgroundColor: "#E2E8F0", borderRadius: 2, alignSelf: "center", marginBottom: 16 },

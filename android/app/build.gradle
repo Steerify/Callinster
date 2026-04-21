@@ -102,15 +102,26 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            if (
+                project.hasProperty('CALLINSTER_UPLOAD_STORE_FILE') &&
+                project.hasProperty('CALLINSTER_UPLOAD_STORE_PASSWORD') &&
+                project.hasProperty('CALLINSTER_UPLOAD_KEY_ALIAS') &&
+                project.hasProperty('CALLINSTER_UPLOAD_KEY_PASSWORD')
+            ) {
+                storeFile file(CALLINSTER_UPLOAD_STORE_FILE)
+                storePassword CALLINSTER_UPLOAD_STORE_PASSWORD
+                keyAlias CALLINSTER_UPLOAD_KEY_ALIAS
+                keyPassword CALLINSTER_UPLOAD_KEY_PASSWORD
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release.storeFile != null ? signingConfigs.release : signingConfigs.debug
             shrinkResources (findProperty('android.enableShrinkResourcesInReleaseBuilds')?.toBoolean() ?: false)
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
