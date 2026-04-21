@@ -1,3 +1,6 @@
+const ANDROID_APPLICATION_ID = process.env.ANDROID_APPLICATION_ID || "com.callinster";
+const ANDROID_VERSION_CODE = Number(process.env.ANDROID_VERSION_CODE || 1);
+
 module.exports = {
   "expo": {
     "name": "Callinster",
@@ -19,7 +22,7 @@ module.exports = {
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.callinster",
+      "package": ANDROID_APPLICATION_ID,
       "permissions": [
         "NOTIFICATIONS",
         "SCHEDULE_EXACT_ALARM",
@@ -27,7 +30,7 @@ module.exports = {
         "READ_CONTACTS"
       ],
       "googleServicesFile": process.env.GOOGLE_SERVICES_FILE,
-      "versionCode": 1
+      "versionCode": ANDROID_VERSION_CODE
     },
     "ios": {
       "bundleIdentifier": "com.callinster",
