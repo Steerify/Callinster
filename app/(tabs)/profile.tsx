@@ -57,7 +57,10 @@ export default function Profile() {
   const tierBg = isElite ? "#fff8e1" : isPremium ? "#eef2ff" : colors.surfaceLight;
 
   useEffect(() => {
-    (async () => {
+    const notifListener = Notifications.addNotificationReceivedListener(() => {});
+    const responseListener = Notifications.addNotificationResponseReceivedListener(() => {});
+
+    const setupNotifications = async () => {
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== "granted") return;
       if (Platform.OS === "android") {
@@ -69,10 +72,14 @@ export default function Profile() {
           enableVibrate: true,
         });
       }
-      const notifListener = Notifications.addNotificationReceivedListener(() => {});
-      const responseListener = Notifications.addNotificationResponseReceivedListener(() => {});
-      return () => { notifListener.remove(); responseListener.remove(); };
-    })();
+    };
+
+    setupNotifications();
+
+    return () => {
+      notifListener.remove();
+      responseListener.remove();
+    };
   }, []);
 
   const sendTestNotification = async () => {
