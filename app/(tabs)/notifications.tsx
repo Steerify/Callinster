@@ -8,7 +8,6 @@ import {
     RefreshControl,
     SafeAreaView,
     ScrollView,
-    StyleSheet,
     Text,
     TouchableOpacity,
     View,
@@ -18,6 +17,7 @@ import Contact from "../../components/Contact";
 import { useSubscription } from "../../components/Subsceiption";
 import { COLORS } from "../../constants/theme";
 import { useTheme } from "../../contexts/ThemeContext";
+import { createNotificationsStyles } from "../../styles/notifications.styles";
 
 type MyContact = {
   id: string;
@@ -29,8 +29,8 @@ export default function Notifications() {
   const [favorites, setFavorites] = useState<MyContact[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const { tier } = useSubscription();
-  const [showPlanDetails, setShowPlanDetails] = useState(false);
   const { colors } = useTheme();
+  const nStyles = createNotificationsStyles();
 
   const isElite = tier === "elite";
   const isPremium = tier === "premium";
@@ -113,7 +113,7 @@ export default function Notifications() {
           <Text style={[nStyles.headerTitle, { color: colors.text }]}>Favorites</Text>
         </SafeAreaView>
 
-        <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+        <ScrollView contentContainerStyle={nStyles.sectionSpacing}>
           <Carousel data={carouselData} />
 
           {/* Upgrade Prompt */}
@@ -129,22 +129,22 @@ export default function Notifications() {
               <Text style={[nStyles.upgradeTitle, { color: isPremium ? "#7c3aed" : colors.primary }]}>
                 {isPremium ? "Elite Awaits You! 🏆" : "Upgrade Your Experience ✨"}
               </Text>
-              <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 12, lineHeight: 19 }}>
+              <Text style={[nStyles.upgradeText, { color: colors.textSecondary }]}>
                 {isPremium
                   ? "Get unlimited favorites, exclusive features, and a truly distraction-free app."
                   : "Upgrade to Premium or Elite for amazing features and a smoother experience!"}
               </Text>
               {["Unlimited favorites", "Unlimited deletes", "No ads or prompts", "Advanced search"].map(f => (
-                <View key={f} style={{ flexDirection: "row", alignItems: "center", marginBottom: 3 }}>
+                <View key={f} style={nStyles.featureRow}>
                   <Ionicons name="checkmark-circle" size={14} color={isPremium ? "#7c3aed" : colors.primary} />
-                  <Text style={{ color: colors.textSecondary, fontSize: 13, marginLeft: 6 }}>{f}</Text>
+                  <Text style={[nStyles.featureText, { color: colors.textSecondary }]}>{f}</Text>
                 </View>
               ))}
               <TouchableOpacity
                 style={[nStyles.upgradeBtn, { backgroundColor: isPremium ? "#7c3aed" : colors.primary }]}
-                onPress={() => setShowPlanDetails(true)}
+                onPress={() => Linking.openURL("mailto:support@callinster.com?subject=Upgrade%20Callinster%20Plan")}
               >
-                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 14 }}>
+                <Text style={nStyles.upgradeBtnText}>
                   {isPremium ? "Upgrade to Elite" : "See Plans"}
                 </Text>
               </TouchableOpacity>
@@ -176,7 +176,7 @@ export default function Notifications() {
             <Text style={[nStyles.emptySubtitle, { color: colors.subtext }]}>
               Tap the ♥ icon on any contact in the Home tab to add them here.
             </Text>
-            <Text style={{ color: colors.placeholder, fontSize: 13, marginTop: 8 }}>Pull to refresh</Text>
+            <Text style={[nStyles.pullHint, { color: colors.placeholder }]}>Pull to refresh</Text>
           </View>
         </ScrollView>
       </View>
@@ -190,15 +190,15 @@ export default function Notifications() {
         <Image source={require("../../assets/images/splash-icon.png")} style={nStyles.headerIcon} resizeMode="contain" />
         <Text style={[nStyles.headerTitle, { color: colors.text }]}>Favorites</Text>
         <View style={[nStyles.countPill, { backgroundColor: `${COLORS.heart}18` }]}>
-          <Text style={{ color: COLORS.heart, fontWeight: "700", fontSize: 12 }}>{favorites.length}</Text>
+          <Text style={[nStyles.featureText, { color: COLORS.heart, marginLeft: 0 }]}>{favorites.length}</Text>
         </View>
       </SafeAreaView>
       <Carousel data={carouselData} />
       <FlatList
         data={favorites}
         keyExtractor={item => item.id}
-        style={{ marginBottom: 80, paddingHorizontal: 4 }}
-        contentContainerStyle={{ paddingVertical: 4 }}
+        style={nStyles.listStyle}
+        contentContainerStyle={nStyles.listContent}
         renderItem={({ item }) => (
           <Contact
             contact={item}
@@ -212,20 +212,3 @@ export default function Notifications() {
     </View>
   );
 }
-
-const nStyles = StyleSheet.create({
-  screen: { flex: 1 },
-  header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 20, paddingBottom: 10 },
-  headerIcon: { width: 28, height: 28, marginRight: 8 },
-  headerTitle: { fontSize: 20, fontWeight: "700", flex: 1 },
-  countPill: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
-  upgradeCard: { margin: 16, borderRadius: 16, borderWidth: 1.5, flexDirection: "row", overflow: "hidden" },
-  upgradeIllustration: { flex: 1, alignItems: "center", justifyContent: "center", padding: 16 },
-  upgradeContent: { flex: 2, padding: 16 },
-  upgradeTitle: { fontSize: 16, fontWeight: "700", marginBottom: 8 },
-  upgradeBtn: { borderRadius: 10, paddingVertical: 10, alignItems: "center", marginTop: 12 },
-  emptyState: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 40, paddingTop: 40 },
-  emptyIconWrap: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center", marginBottom: 20 },
-  emptyTitle: { fontSize: 20, fontWeight: "700", marginBottom: 8 },
-  emptySubtitle: { fontSize: 14, textAlign: "center", lineHeight: 20 },
-});

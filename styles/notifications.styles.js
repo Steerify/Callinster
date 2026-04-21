@@ -1,86 +1,43 @@
 import { StyleSheet } from "react-native";
 import { COLORS } from "@/constants/theme";
+import { iconSize, patterns, radius, spacing, typography } from "./tokens";
 
-export const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: COLORS.surface,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontFamily: "JetBrainsMono-Medium",
-    color: COLORS.primary,
-  },
-  listContainer: {
-    padding: 16,
-  },
-  notificationItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  notificationContent: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  avatarContainer: {
-    position: "relative",
-    marginRight: 12,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: COLORS.surface,
-  },
-  iconBadge: {
-    position: "absolute",
-    bottom: -4,
-    right: -4,
-    backgroundColor: COLORS.background,
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: COLORS.surface,
-  },
-  notificationInfo: {
-    flex: 1,
-  },
-  username: {
-    color: COLORS.white,
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 2,
-  },
-  action: {
-    color: COLORS.grey,
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  timeAgo: {
-    color: COLORS.grey,
-    fontSize: 12,
-  },
-  postImage: {
-    width: 44,
-    height: 44,
-    borderRadius: 6,
-  },
-  centered: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+export const createNotificationsStyles = () =>
+  StyleSheet.create({
+    screen: { flex: 1 },
+    header: patterns.header,
+    headerIcon: { width: 28, height: 28, marginRight: spacing.xs },
+    headerTitle: { ...typography.title, flex: 1 },
+    countPill: { paddingHorizontal: spacing.sm - 2, paddingVertical: spacing.xxs - 1, borderRadius: radius.pill },
+    sectionSpacing: { paddingBottom: spacing.xl },
+    listStyle: { marginBottom: 80, paddingHorizontal: spacing.xxs },
+    listContent: { paddingVertical: spacing.xxs },
+    upgradeCard: {
+      ...patterns.card,
+      margin: spacing.md,
+      borderWidth: 1.5,
+      flexDirection: "row",
+      overflow: "hidden",
+    },
+    upgradeIllustration: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.md },
+    upgradeContent: { flex: 2, padding: spacing.md },
+    upgradeTitle: { ...typography.titleSmall, marginBottom: spacing.xs },
+    upgradeText: { color: COLORS.grey, ...typography.bodySmall, marginBottom: spacing.sm, lineHeight: 19 },
+    featureRow: { flexDirection: "row", alignItems: "center", marginBottom: spacing.xxs - 1 },
+    featureText: { ...typography.bodySmall, marginLeft: spacing.xs - 2 },
+    upgradeBtn: { ...patterns.button, borderRadius: radius.md - 2, marginTop: spacing.sm },
+    upgradeBtnText: { color: COLORS.white, ...typography.bodyStrong },
+    emptyState: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 40, paddingTop: 40 },
+    emptyIconWrap: {
+      width: 96,
+      height: 96,
+      borderRadius: radius.pill,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: spacing.lg,
+    },
+    emptyTitle: { ...typography.title, marginBottom: spacing.xs },
+    emptySubtitle: { ...typography.body, textAlign: "center", lineHeight: 20 },
+    pullHint: { ...typography.bodySmall, marginTop: spacing.xs },
+    heartIcon: { size: iconSize.xl },
+  });

@@ -179,9 +179,76 @@ npm run lint
 
 ---
 
-## Tech stack
-- Expo SDK 54 + React Native 0.81
-- Expo Router
-- Clerk Expo SDK
-- AsyncStorage
-- Expo Contacts / Notifications / Linking
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Android release (EAS + Gradle)
+
+### 1) Configured release settings
+
+- **App config** (`app.config.js`)
+  - Android package is controlled by `ANDROID_APPLICATION_ID` (defaults to `com.callinster`).
+  - Android `versionCode` is controlled by `ANDROID_VERSION_CODE` (defaults to `1`).
+- **EAS profiles** (`eas.json`)
+  - `production-aab`: Google Play app bundle (`.aab`).
+  - `production-apk`: release APK (`.apk`).
+  - `local-release`: local Gradle-compatible store build using `credentialsSource: local`.
+- **Native Android signing** (`android/app/build.gradle`)
+  - Release signing uses Gradle properties:
+    - `CALLINSTER_UPLOAD_STORE_FILE`
+    - `CALLINSTER_UPLOAD_STORE_PASSWORD`
+    - `CALLINSTER_UPLOAD_KEY_ALIAS`
+    - `CALLINSTER_UPLOAD_KEY_PASSWORD`
+  - If these are absent, release build falls back to debug signing (safe for CI smoke builds, **not** Play Store distribution).
+
+### 2) Validate current release configuration
+
+```bash
+npx expo config --type public | rg -n '"android"|"package"|"versionCode"'
+./android/gradlew -p android :app:tasks --all | rg -n 'assembleRelease|bundleRelease'
+```
+
+### 3) Build commands (exact)
+
+#### Cloud build with EAS
+
+```bash
+# AAB (Google Play)
+eas build --platform android --profile production-aab
+
+# APK (internal QA / sideload)
+eas build --platform android --profile production-apk
+```
+
+Artifact URLs appear:
+- In CLI output under **Build details** / **Install page** links.
+- On Expo dashboard project builds page (`https://expo.dev/accounts/<owner>/projects/<slug>/builds`).
+
+#### Local Gradle build (signed when secrets are provided)
+
+```bash
+cd android
+./gradlew clean
+./gradlew bundleRelease   # outputs .aab
+./gradlew assembleRelease # outputs .apk
+```
+
+Artifacts appear at:
+- `android/app/build/outputs/bundle/release/app-release.aab`
+- `android/app/build/outputs/apk/release/app-release.apk`
+
+### 4) If CI/local credentials are missing
+
+Minimal required secrets:
+- `CALLINSTER_UPLOAD_STORE_FILE` (path to keystore file)
+- `CALLINSTER_UPLOAD_STORE_PASSWORD`
+- `CALLINSTER_UPLOAD_KEY_ALIAS`
+- `CALLINSTER_UPLOAD_KEY_PASSWORD`
+- `EXPO_TOKEN` (for non-interactive EAS cloud builds)
+- `GOOGLE_SERVICES_FILE` (if Firebase config is required in build context)
+
+One-command path once secrets are supplied:
+
+```bash
+eas build --platform android --profile production-aab --non-interactive
+```

@@ -20,6 +20,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import Swipeable from "react-native-gesture-handler/Swipeable";
 import { COLORS } from "../../constants/theme";
 import { useTheme } from "../contexts/ThemeContext";
 
@@ -44,6 +45,7 @@ type WeeklyPreferences = {
 interface ContactProps {
   contact: MyContact;
   onDelete: () => void;
+  onScheduleReminder?: (contact: MyContact) => void;
   showHeart?: boolean;
   onFavorite?: (contact: MyContact) => void;
   weeklyPreferences: WeeklyPreferences;
@@ -74,8 +76,9 @@ function sanitizeUsername(username: string) {
   return username.replace(/[^a-zA-Z0-9._-]/g, "");
 }
 
-export default function Contact({ contact, onDelete, showHeart = false, onFavorite, weeklyPreferences }: ContactProps) {
+export default function Contact({ contact, onDelete, onScheduleReminder, showHeart = false, onFavorite, weeklyPreferences }: ContactProps) {
   const { colors } = useTheme();
+  const swipeableRef = React.useRef<Swipeable | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [connectModalVisible, setConnectModalVisible] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState<string | null>(null);
@@ -85,8 +88,6 @@ export default function Contact({ contact, onDelete, showHeart = false, onFavori
   const [usernameError, setUsernameError] = useState("");
 
   const avatarColor = getAvatarColor(contact.name);
-  const days = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
-  const today = days[new Date().getDay()];
   const getCurrentDayPreferences = () => {
     const day = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase() as keyof WeeklyPreferences;
     return weeklyPreferences?.[day] || { calls: true, messages: true };
@@ -219,14 +220,49 @@ export default function Contact({ contact, onDelete, showHeart = false, onFavori
     handleSaveUsername();
   };
 
+  const handleSwipeOpen = (direction: "left" | "right") => {
+    swipeableRef.current?.close();
+    if (direction === "right") {
+      onDelete();
+      return;
+    }
+    onScheduleReminder?.(contact);
+  };
+
+  const renderLeftActions = () => (
+    <View style={[cStyles.swipeAction, cStyles.leftSwipeAction, { backgroundColor: colors.primary }]}> 
+      <Ionicons name="alarm-outline" size={20} color="#fff" />
+      <Text style={cStyles.swipeActionText}>Reminder</Text>
+    </View>
+  );
+
+  const renderRightActions = () => (
+    <View style={[cStyles.swipeAction, cStyles.rightSwipeAction]}>
+      <Ionicons name="trash-outline" size={20} color="#fff" />
+      <Text style={cStyles.swipeActionText}>Delete</Text>
+    </View>
+  );
+
   return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={toggleExpand}
-      style={[cStyles.card, { backgroundColor: colors.surface, shadowColor: colors.primary }]}
+    <Swipeable
+      ref={swipeableRef}
+      renderLeftActions={renderLeftActions}
+      renderRightActions={renderRightActions}
+      onSwipeableOpen={handleSwipeOpen}
+      leftThreshold={96}
+      rightThreshold={96}
+      dragOffsetFromLeftEdge={24}
+      dragOffsetFromRightEdge={24}
+      overshootLeft={false}
+      overshootRight={false}
     >
-      {/* Contact row */}
-      <View style={cStyles.row}>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={toggleExpand}
+        style={[cStyles.card, { backgroundColor: colors.surface, shadowColor: colors.primary }]}
+      >
+        {/* Contact row */}
+        <View style={cStyles.row}>
         {/* Avatar */}
         <View style={[cStyles.avatar, { backgroundColor: avatarColor }]}>
           <Text style={cStyles.avatarText}>{contact.name.charAt(0).toUpperCase()}</Text>
@@ -252,11 +288,11 @@ export default function Contact({ contact, onDelete, showHeart = false, onFavori
           )}
           <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={18} color={colors.subtext} />
         </View>
-      </View>
+        </View>
 
       {/* Expanded phone numbers */}
-      {expanded && (
-        <Animated.View style={{ overflow: "hidden" }}>
+        {expanded && (
+          <Animated.View style={{ overflow: "hidden" }}>
           <View style={[cStyles.divider, { backgroundColor: colors.divider }]} />
           {contact.phoneNumbers && contact.phoneNumbers.length > 0 ? (
             contact.phoneNumbers.map((phone, idx) => (
@@ -274,11 +310,11 @@ export default function Contact({ contact, onDelete, showHeart = false, onFavori
           ) : (
             <Text style={[cStyles.noPhone, { color: colors.subtext }]}>No phone number</Text>
           )}
-        </Animated.View>
-      )}
+          </Animated.View>
+        )}
 
       {/* Connect Modal */}
-      <Modal visible={connectModalVisible} transparent animationType="slide" onRequestClose={() => setConnectModalVisible(false)}>
+        <Modal visible={connectModalVisible} transparent animationType="slide" onRequestClose={() => setConnectModalVisible(false)}>
         <TouchableOpacity style={cStyles.modalBackdrop} activeOpacity={1} onPress={() => setConnectModalVisible(false)}>
           <TouchableOpacity activeOpacity={1} onPress={e => e.stopPropagation()} style={[cStyles.connectSheet, { backgroundColor: colors.surface }]}>
             <View style={cStyles.sheetHandle} />
@@ -317,10 +353,10 @@ export default function Contact({ contact, onDelete, showHeart = false, onFavori
             ))}
           </TouchableOpacity>
         </TouchableOpacity>
-      </Modal>
+        </Modal>
 
       {/* Username Edit Modal */}
-      <Modal visible={!!editUsernameModal} transparent animationType="fade" onRequestClose={() => { setEditUsernameModal(null); setUsernameInput(""); }}>
+        <Modal visible={!!editUsernameModal} transparent animationType="fade" onRequestClose={() => { setEditUsernameModal(null); setUsernameInput(""); }}>
         <View style={[cStyles.modalOverlay, { backgroundColor: colors.overlay }]}>
           <View style={[cStyles.usernameCard, { backgroundColor: colors.surface }]}>
             <Text style={[cStyles.usernameTitle, { color: colors.text }]}>
@@ -349,8 +385,9 @@ export default function Contact({ contact, onDelete, showHeart = false, onFavori
             </View>
           </View>
         </View>
-      </Modal>
-    </TouchableOpacity>
+        </Modal>
+      </TouchableOpacity>
+    </Swipeable>
   );
 }
 
@@ -382,4 +419,8 @@ const cStyles = StyleSheet.create({
   usernameError: { color: "#ef4444", fontSize: 12, marginBottom: 12 },
   usernameSaveBtn: { flex: 1, borderRadius: 10, paddingVertical: 12, alignItems: "center" },
   usernameCancelBtn: { flex: 1, borderRadius: 10, paddingVertical: 12, alignItems: "center", backgroundColor: "#F1F5F9" },
+  swipeAction: { flex: 1, marginBottom: 10, borderRadius: 14, alignItems: "center", justifyContent: "center", gap: 4 },
+  leftSwipeAction: { marginRight: 8 },
+  rightSwipeAction: { marginLeft: 8, backgroundColor: "#ef4444" },
+  swipeActionText: { color: "#fff", fontWeight: "700", fontSize: 12 },
 });
