@@ -32,6 +32,7 @@ import { useSubscription } from "../components/Subsceiption";
 import { ThemeSwitch } from "../components/ThemeSwitch";
 import Carousel from "../components/homePageCarousel";
 import { useTheme } from "../contexts/ThemeContext";
+import { cleanContact, isValidScheduledCallTime, isWithinDailyDeleteLimit } from "./callHelpers";
 
 type MyContact = {
   id: string;
@@ -78,15 +79,6 @@ const callingApps: CallingApp[] = [
   { id: "discord", name: "Discord", icon: "game-controller-outline", requiresUsername: true },
   { id: "snapchat", name: "Snapchat", icon: "camera-outline", requiresUsername: true },
 ];
-
-const cleanContact = (contact: string, isUsername: boolean): string => {
-  if (isUsername) return contact.trim();
-  let phone = contact.replace(/[^\d+]/g, "");
-  if (!phone.startsWith("+")) {
-    if (/^0\d{7,10}$/.test(phone)) phone = "+234" + phone.substring(1);
-  }
-  return phone;
-};
 
 const getFallbackLink = (appId: string, contact: string): string => {
   const cleaned = cleanContact(contact, callingApps.some(a => a.id === appId && a.requiresUsername));
@@ -463,8 +455,7 @@ export default function Index() {
     const permissionsGranted = await setupNotifications();
     if (!permissionsGranted) return;
     const callTime = getCombinedDateTime();
-    const bufferTime = new Date(Date.now() + 60000);
-    if (callTime <= bufferTime) {
+    if (!isValidScheduledCallTime(callTime)) {
       Alert.alert("Error", "Please select a future time (at least 1 minute from now)");
       return;
     }
@@ -528,11 +519,8 @@ export default function Index() {
   const showTimepicker = () => { setMode("time"); setShowTimePicker(true); };
 
   async function handleDelete(id: string): Promise<void> {
-    let limit = 5;
-    if (tier === "premium") limit = 10;
-    if (tier === "elite") limit = Infinity;
     const deletesToday = await getCounter("deletes");
-    if (deletesToday >= limit) { setShowSubModal(true); return; }
+    if (!isWithinDailyDeleteLimit(deletesToday, tier)) { setShowSubModal(true); return; }
     await incrementCounter("deletes");
     const updated = fiveContacts.filter(contact => contact.id !== id);
     const currentFavsInUpdated = updated.filter(u => favoriteContacts.some(fc => fc.id === u.id)).length;
