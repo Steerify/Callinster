@@ -5,6 +5,7 @@ import { SplashScreen } from "expo-router";
 import { useCallback } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import InitialLayout from "./components/initialLayout";
+import { SubscriptionProvider } from "./components/Subsceiption";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
@@ -29,7 +30,9 @@ export default function RootLayout() {
           onLayout={onLayoutRootView}
         >
           <ThemeProvider>
-            <InitialLayout />
+            <SubscriptionProvider>
+              <InitialLayout />
+            </SubscriptionProvider>
           </ThemeProvider>
         </SafeAreaView>
       </SafeAreaProvider>

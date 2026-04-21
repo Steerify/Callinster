@@ -48,3 +48,28 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## PayPal subscription configuration
+
+Set the following environment variables (for example in `.env`) before testing subscription upgrades:
+
+- `EXPO_PUBLIC_API_BASE_URL`: Base URL for your backend API that proxies PayPal calls.
+- `EXPO_PUBLIC_PAYPAL_CLIENT_ID`: PayPal REST client ID (used by backend).
+- `PAYPAL_CLIENT_SECRET`: PayPal REST client secret (server-side only, never expose in app bundle).
+- `EXPO_PUBLIC_PAYPAL_PREMIUM_PLAN_ID`: PayPal plan ID for Premium tier.
+- `EXPO_PUBLIC_PAYPAL_ELITE_PLAN_ID`: PayPal plan ID for Elite tier.
+- `EXPO_PUBLIC_PAYPAL_ENVIRONMENT`: `sandbox` or `live`.
+- `PAYPAL_WEBHOOK_ID`: PayPal webhook ID used by backend signature verification.
+- `PAYPAL_WEBHOOK_URL`: Public backend endpoint URL receiving PayPal webhook events.
+- `EXPO_PUBLIC_PAYPAL_MOBILE_RETURN_URL`: Deep-link URL that PayPal should redirect to on successful approval.
+- `EXPO_PUBLIC_PAYPAL_MOBILE_CANCEL_URL`: Deep-link URL that PayPal should redirect to when user cancels.
+
+### Required backend endpoints
+
+The mobile app now calls these backend integration points:
+
+- `POST /billing/paypal/subscriptions/create` → create PayPal subscription and return checkout URL.
+- `POST /billing/paypal/subscriptions/capture` → capture/activate approved subscription.
+- `GET /billing/subscription-status` → return webhook-driven subscription status for current user.
+
+`/billing/subscription-status` should read the latest tier/status from your server-side store (updated by PayPal webhooks) so the app can stay in sync across devices and app restarts.
