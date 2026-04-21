@@ -527,6 +527,20 @@ export default function Index() {
   const showDatepicker = () => { setMode("date"); setShowDatePicker(true); };
   const showTimepicker = () => { setMode("time"); setShowTimePicker(true); };
 
+  const openReminderForContact = (contact: MyContact) => {
+    const firstPhone = contact.phoneNumbers?.[0]?.number?.trim() ?? "";
+    const prefilledContact = firstPhone || contact.name;
+    const now = new Date();
+    const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+
+    setContactPickerMode("manual");
+    setSelectedApp("phone");
+    setContactInput(prefilledContact);
+    setDate(oneHourFromNow);
+    setTime(oneHourFromNow);
+    setCallModalVisible(true);
+  };
+
   async function handleDelete(id: string): Promise<void> {
     let limit = 5;
     if (tier === "premium") limit = 10;
@@ -922,6 +936,7 @@ export default function Index() {
                     key={contact.id}
                     contact={contact}
                     onDelete={() => { void handleDelete(contact.id); }}
+                    onScheduleReminder={openReminderForContact}
                     showHeart={tier === "elite"}
                     weeklyPreferences={weeklyPreferences}
                   />
