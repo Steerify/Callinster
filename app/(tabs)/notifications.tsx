@@ -17,7 +17,7 @@ import Carousel from "../../components/Carousel";
 import Contact from "../../components/Contact";
 import { useSubscription } from "../../components/Subsceiption";
 import { COLORS } from "../../constants/theme";
-import { useTheme } from "../../contexts/ThemeContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 type MyContact = {
   id: string;
@@ -63,7 +63,7 @@ export default function Notifications() {
       key: "feedback",
       title: "⭐ Enjoying Callinster?",
       subtitle: "Rate us on the Play Store!",
-      action: () => Linking.openURL("https://play.google.com/store/apps/details?id=your.app.id"),
+      action: () => Linking.openURL("https://play.google.com/store/apps/details?id=com.callinster"),
       bgColor: "#eef2ff",
       textColor: "#091556",
       icon: "thumbs-up",
@@ -95,13 +95,13 @@ export default function Notifications() {
   ];
 
   const weeklyPreferencesDefault = {
-    monday: { calls: false, messages: false },
-    tuesday: { calls: false, messages: false },
-    wednesday: { calls: false, messages: false },
-    thursday: { calls: false, messages: false },
-    friday: { calls: false, messages: false },
-    saturday: { calls: false, messages: false },
-    sunday: { calls: false, messages: false },
+    monday: { calls: true, messages: true },
+    tuesday: { calls: true, messages: true },
+    wednesday: { calls: true, messages: true },
+    thursday: { calls: true, messages: true },
+    friday: { calls: true, messages: true },
+    saturday: { calls: true, messages: true },
+    sunday: { calls: true, messages: true },
   };
 
   // Non-elite: show upgrade prompt

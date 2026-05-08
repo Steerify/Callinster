@@ -91,14 +91,7 @@ export default function NotificationSettings({
 }: NotificationSettingsProps) {
   const [dailyRemindersEnabled, setDailyRemindersEnabled] = useState(true);
   const [holidayRemindersEnabled, setHolidayRemindersEnabled] = useState(true);
-  ExpoNotifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    }),
-  });
+  // Notification handler is set once in app/(tabs)/index.tsx — do NOT set it again here
   useEffect(() => {
     (async () => {
       const { status } = await ExpoNotifications.requestPermissionsAsync();
@@ -143,17 +136,17 @@ export default function NotificationSettings({
     await ExpoNotifications.cancelAllScheduledNotificationsAsync();
     await scheduleNotification(
       getRandomQuote(),
-      { hour: 8, minute: 0, repeats: true },
+      { type: ExpoNotifications.SchedulableTriggerInputTypes.DAILY, hour: 8, minute: 0 },
       { openScreen: "contacts" }
     );
     await scheduleNotification(
       getRandomQuote(),
-      { hour: 13, minute: 0, repeats: true },
+      { type: ExpoNotifications.SchedulableTriggerInputTypes.DAILY, hour: 13, minute: 0 },
       { openScreen: "contacts" }
     );
     await scheduleNotification(
       getRandomQuote(),
-      { hour: 20, minute: 0, repeats: true },
+      { type: ExpoNotifications.SchedulableTriggerInputTypes.DAILY, hour: 20, minute: 0 },
       { openScreen: "contacts" }
     );
   };
@@ -235,8 +228,8 @@ export default function NotificationSettings({
       priority: ExpoNotifications.AndroidNotificationPriority.HIGH,
 
     },
-    trigger: null, // Immediate notification
-    });
+    trigger: { type: ExpoNotifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 1 },
+  });
 };
 
   return (

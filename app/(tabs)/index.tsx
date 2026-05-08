@@ -28,7 +28,7 @@ import { COLORS } from "../../constants/theme";
 import { styles } from "../../styles/feed.styles";
 import Contact from "../components/Contact";
 import Loader from "../components/Loader";
-import { useSubscription } from "../components/Subsceiption";
+import { useSubscription } from "../../components/Subsceiption";
 import { ThemeSwitch } from "../components/ThemeSwitch";
 import Carousel from "../components/homePageCarousel";
 import { useTheme } from "../contexts/ThemeContext";
@@ -238,11 +238,14 @@ export default function Index() {
 
   const checkBatteryOptimization = async () => {
     if (Platform.OS === "android" && Device.isDevice) {
+      const alreadyShown = await AsyncStorage.getItem("batteryOptShown");
+      if (alreadyShown) return;
+      await AsyncStorage.setItem("batteryOptShown", "true");
       Alert.alert(
         "Battery Optimization",
         "To ensure notifications work reliably, please disable battery optimization for this app.",
         [
-          { text: "Cancel", style: "cancel" },
+          { text: "Later", style: "cancel" },
           { text: "Open Settings", onPress: () => Linking.openSettings() },
         ]
       );
@@ -256,7 +259,7 @@ export default function Index() {
       subtitle: "Learn more about our features",
       action: () => setCallinsterModalVisible(true),
       textColor: "#c090f1ff",
-      icon: "information-circle",
+      icon: "information-circle" as any,
       bgImage: require("../../assets/images/Callinsterlogo(2).jpg"),
     },
     {
@@ -265,7 +268,7 @@ export default function Index() {
       subtitle: "The best way to get started is to quit talking and begin doing. – Walt Disney",
       bgColor: "#f0eaff",
       textColor: "#7c3aed",
-      icon: "bulb",
+      icon: "bulb" as any,
     },
     {
       key: "quote2",
@@ -273,7 +276,7 @@ export default function Index() {
       subtitle: "Success is not final, failure is not fatal: It is the courage to continue that counts. – Churchill",
       bgColor: "#eaf0ff",
       textColor: "#091556",
-      icon: "rocket",
+      icon: "rocket" as any,
     },
     {
       key: "quote3",
@@ -281,7 +284,7 @@ export default function Index() {
       subtitle: "It does not matter how slowly you go as long as you do not stop. – Confucius",
       bgColor: "#fff0f5",
       textColor: "#db2777",
-      icon: "walk",
+      icon: "walk" as any,
     },
     {
       key: "quote4",
@@ -289,7 +292,7 @@ export default function Index() {
       subtitle: "The most important thing in communication is hearing what isn't said. – Peter Drucker",
       bgColor: "#e0f2fe",
       textColor: "#0284c7",
-      icon: "chatbubbles",
+      icon: "chatbubbles" as any,
     },
     {
       key: "quote5",
@@ -480,7 +483,7 @@ export default function Index() {
           data: { app: selectedApp, contact: cleanedContact, type: "scheduled-call" },
           sound: true,
         },
-        trigger: { date: callTime },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: callTime },
       });
       const callData: ScheduledCall = {
         id: Date.now().toString(),
@@ -878,7 +881,10 @@ export default function Index() {
                       <Text style={[localStyles.planFeature, { color: colors.textSecondary }]}>{f}</Text>
                     </View>
                   ))}
-                  <TouchableOpacity style={[localStyles.planBtn, { backgroundColor: colors.primary }]}>
+                  <TouchableOpacity
+                    style={[localStyles.planBtn, { backgroundColor: colors.primary }]}
+                    onPress={() => Alert.alert("Coming Soon", "Premium plan will be available soon! Stay tuned.")}
+                  >
                     <Text style={{ color: "#fff", fontWeight: "700" }}>Upgrade to Premium</Text>
                   </TouchableOpacity>
                 </View>
@@ -892,7 +898,10 @@ export default function Index() {
                       <Text style={[localStyles.planFeature, { color: "#78350f" }]}>{f}</Text>
                     </View>
                   ))}
-                  <TouchableOpacity style={[localStyles.planBtn, { backgroundColor: "#b45309" }]}>
+                  <TouchableOpacity
+                    style={[localStyles.planBtn, { backgroundColor: "#b45309" }]}
+                    onPress={() => Alert.alert("Coming Soon", "Elite plan will be available soon! Stay tuned.")}
+                  >
                     <Text style={{ color: "#fff", fontWeight: "700" }}>Upgrade to Elite</Text>
                   </TouchableOpacity>
                 </View>

@@ -16,22 +16,14 @@ import {
 } from "react-native";
 import { COLORS } from "../../constants/theme";
 import NotificationSettings from "../components/NotificationSettings";
-import { useSubscription } from "../components/Subsceiption";
+import { useSubscription } from "../../components/Subsceiption";
 import { useTheme } from "../contexts/ThemeContext";
 
 const eliteBg = require("../../assets/images/Callinsterlogo(1).jpg");
 const regularBg = require("../../assets/images/Callinsterlogo(2).jpg");
 const NOTIFICATION_CHANNEL_ID = "profile-notifications";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// Notification handler is set once in app/(tabs)/index.tsx — do NOT duplicate here
 
 export default function Profile() {
   const { tier } = useSubscription();
@@ -84,7 +76,7 @@ export default function Profile() {
           data: { screen: "profile" },
           sound: true,
         },
-        trigger: { seconds: 1, channelId: NOTIFICATION_CHANNEL_ID },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 1, channelId: NOTIFICATION_CHANNEL_ID },
       });
       Alert.alert("Sent!", "Test notification delivered.");
     } catch {
@@ -206,8 +198,8 @@ export default function Profile() {
             <ScrollView>
               {[
                 { name: "Basic", price: "Free", color: colors.subtext, bg: colors.card, features: ["5 contacts/day", "5 deletes/day", "Avoid prefixes"], btn: false },
-                { name: "Premium", price: "₦X/month", color: colors.primary, bg: "#eef2ff", features: ["Extended contacts", "10 deletes/day", "Advanced search", "Avoid prefixes"], btn: true },
-                { name: "Elite ⭐", price: "₦X/month", color: "#b45309", bg: "#fffbea", features: ["Unlimited contacts", "Unlimited deletes", "Favorites", "No ads", "Advanced search"], btn: true },
+                { name: "Premium", price: "Coming Soon", color: colors.primary, bg: "#eef2ff", features: ["Extended contacts", "10 deletes/day", "Advanced search", "Avoid prefixes"], btn: true },
+                { name: "Elite ⭐", price: "Coming Soon", color: "#b45309", bg: "#fffbea", features: ["Unlimited contacts", "Unlimited deletes", "Favorites", "No ads", "Advanced search"], btn: true },
               ].map((plan, i) => (
                 <View key={i} style={[pStyles.planBox, { backgroundColor: plan.bg, borderColor: plan.color }]}>
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
@@ -221,7 +213,7 @@ export default function Profile() {
                     </View>
                   ))}
                   {plan.btn && (
-                    <TouchableOpacity style={[pStyles.planUpgradeBtn, { backgroundColor: plan.color }]}>
+                    <TouchableOpacity style={[pStyles.planUpgradeBtn, { backgroundColor: plan.color }]} onPress={() => Alert.alert("Coming Soon", `${plan.name.replace(" ⭐", "")} plan will be available soon! Stay tuned.`)}>
                       <Text style={{ color: "#fff", fontWeight: "700" }}>Upgrade to {plan.name.replace(" ⭐", "")}</Text>
                     </TouchableOpacity>
                   )}

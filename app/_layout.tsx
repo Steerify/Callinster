@@ -4,6 +4,7 @@ import { useFonts } from "expo-font";
 import { SplashScreen } from "expo-router";
 import { useCallback } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SubscriptionProvider } from "../components/Subsceiption";
 import InitialLayout from "./components/initialLayout";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -25,11 +26,13 @@ export default function RootLayout() {
     >
       <SafeAreaProvider>
         <SafeAreaView
-          style={{ flex: 1, backgroundColor: "#0A0F2C" }}
+          style={{ flex: 1 }}
           onLayout={onLayoutRootView}
         >
           <ThemeProvider>
-            <InitialLayout />
+            <SubscriptionProvider>
+              <InitialLayout />
+            </SubscriptionProvider>
           </ThemeProvider>
         </SafeAreaView>
       </SafeAreaProvider>
