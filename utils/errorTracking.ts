@@ -1,23 +1,9 @@
-import * as Sentry from "sentry-expo";
+// Error tracking utility — Sentry can be wired in later if needed.
 
-// Sentry.init({
-//   dsn: "your-sentry-dsn",
-//   enableInExpoDevelopment: false,
-//   debug: false,
-//   tracesSampleRate: 0.2,
-// });
-
-export const logError = (error: Error, context = {}) => {
-  if (__DEV__) {
-    console.error(error);
-  } else {
-    Sentry.Native.captureException(error, { extra: context });
-  }
+export const logError = (error: Error, context: Record<string, unknown> = {}) => {
+  console.error("[Callinster Error]", error, context);
 };
-export const logMessage = (message: string, context = {}) => {
-  if (__DEV__) {
-    console.log(message);
-  } else {
-    Sentry.Native.captureMessage(message, { extra: context });
-  }
+
+export const logMessage = (message: string, context: Record<string, unknown> = {}) => {
+  console.log("[Callinster]", message, context);
 };

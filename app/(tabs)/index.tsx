@@ -384,73 +384,75 @@ export default function Index() {
     return () => { notifSub.remove(); };
   }, [initiateCall]);
 
+  const fetchContacts = async () => {
+    setLoading(true);
+    const { status } = await Contacts.requestPermissionsAsync();
+    if (status === "granted") {
+      const { data } = await Contacts.getContactsAsync({ fields: [Contacts.Fields.PhoneNumbers] });
+
+      if (data.length === 0) {
+        Alert.alert("No Contacts Found", "Please add contacts to your device.");
+        setLoading(false);
+        return;
+      }
+
+      const validContacts = data.filter(
+        contact =>
+          contact.phoneNumbers &&
+          contact.phoneNumbers.length > 0 &&
+          !avoidPrefixes.some(prefix =>
+            contact.phoneNumbers?.some(p => p.number?.replace(/\s+/g, "").startsWith(prefix))
+          ) &&
+          contact.name &&
+          !avoidNamePrefixes.some(prefix =>
+            contact.name.trim().toLowerCase().startsWith(prefix.toLowerCase())
+          )
+      );
+
+      const mappedContacts: MyContact[] = validContacts.map(contact => ({
+        id: contact.id ?? "",
+        name: contact.name ?? "",
+        phoneNumbers: contact.phoneNumbers
+          ? [...new Set(contact.phoneNumbers.map(p => p.number ?? ""))]
+              .filter(num => num)
+              .map(num => ({ number: num }))
+          : [],
+      }));
+
+      const shuffled = [...mappedContacts].sort(() => 0.5 - Math.random());
+
+      // Load stored favorites
+      const storedFavs = await AsyncStorage.getItem("favoriteContacts");
+      let favList: MyContact[] = storedFavs ? JSON.parse(storedFavs) : [];
+
+      // Ensure we always have a favorite contact logic on init
+      if (favList.length === 0 && shuffled.length > 0) {
+        favList.push(shuffled[0]);
+        await AsyncStorage.setItem("favoriteContacts", JSON.stringify(favList));
+      }
+      setFavoriteContacts(favList);
+      setAllContacts(shuffled);
+
+      // Build 5-contact display: 1-3 random favorites + fill rest with random contacts
+      if (favList.length > 0) {
+        const favCount = Math.min(3, Math.max(1, Math.floor(Math.random() * 3) + 1));
+        const shuffledFavs = [...favList].sort(() => 0.5 - Math.random());
+        const chosenFavs = shuffledFavs.slice(0, Math.min(favCount, favList.length));
+        const favIds = new Set(chosenFavs.map(f => f.id));
+        const remaining = shuffled.filter(c => !favIds.has(c.id)).slice(0, 5 - chosenFavs.length);
+        setFiveContacts([...chosenFavs, ...remaining]);
+      } else {
+        setFiveContacts(shuffled.slice(0, 5));
+      }
+    } else {
+      Alert.alert("Permission Denied", "Please grant contact access to view contacts.");
+    }
+    setLoading(false);
+  };
+
   // Load contacts and pick 5 (with 1-3 favorites included)
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const { status } = await Contacts.requestPermissionsAsync();
-      if (status === "granted") {
-        const { data } = await Contacts.getContactsAsync({ fields: [Contacts.Fields.PhoneNumbers] });
-
-        if (data.length === 0) {
-          Alert.alert("No Contacts Found", "Please add contacts to your device.");
-          setLoading(false);
-          return;
-        }
-
-        const validContacts = data.filter(
-          contact =>
-            contact.phoneNumbers &&
-            contact.phoneNumbers.length > 0 &&
-            !avoidPrefixes.some(prefix =>
-              contact.phoneNumbers?.some(p => p.number?.replace(/\s+/g, "").startsWith(prefix))
-            ) &&
-            contact.name &&
-            !avoidNamePrefixes.some(prefix =>
-              contact.name.trim().toLowerCase().startsWith(prefix.toLowerCase())
-            )
-        );
-
-        const mappedContacts: MyContact[] = validContacts.map(contact => ({
-          id: contact.id ?? "",
-          name: contact.name ?? "",
-          phoneNumbers: contact.phoneNumbers
-            ? [...new Set(contact.phoneNumbers.map(p => p.number ?? ""))]
-                .filter(num => num)
-                .map(num => ({ number: num }))
-            : [],
-        }));
-
-        const shuffled = [...mappedContacts].sort(() => 0.5 - Math.random());
-
-        // Load stored favorites
-        const storedFavs = await AsyncStorage.getItem("favoriteContacts");
-        let favList: MyContact[] = storedFavs ? JSON.parse(storedFavs) : [];
-
-        // Ensure we always have a favorite contact logic on init
-        if (favList.length === 0 && shuffled.length > 0) {
-          favList.push(shuffled[0]);
-          await AsyncStorage.setItem("favoriteContacts", JSON.stringify(favList));
-        }
-        setFavoriteContacts(favList);
-        setAllContacts(shuffled);
-
-        // Build 5-contact display: 1-3 random favorites + fill rest with random contacts
-        if (favList.length > 0) {
-          const favCount = Math.min(3, Math.max(1, Math.floor(Math.random() * 3) + 1));
-          const shuffledFavs = [...favList].sort(() => 0.5 - Math.random());
-          const chosenFavs = shuffledFavs.slice(0, Math.min(favCount, favList.length));
-          const favIds = new Set(chosenFavs.map(f => f.id));
-          const remaining = shuffled.filter(c => !favIds.has(c.id)).slice(0, 5 - chosenFavs.length);
-          setFiveContacts([...chosenFavs, ...remaining]);
-        } else {
-          setFiveContacts(shuffled.slice(0, 5));
-        }
-      } else {
-        Alert.alert("Permission Denied", "Please grant contact access to view contacts.");
-      }
-      setLoading(false);
-    })();
+    fetchContacts();
   }, [avoidPrefixes, avoidNamePrefixes]);
 
   const scheduleCall = async () => {
@@ -478,7 +480,7 @@ export default function Index() {
           data: { app: selectedApp, contact: cleanedContact, type: "scheduled-call" },
           sound: true,
         },
-        trigger: callTime,
+        trigger: { date: callTime },
       });
       const callData: ScheduledCall = {
         id: Date.now().toString(),
@@ -711,6 +713,9 @@ export default function Index() {
               />
             </View>
           )}
+          <TouchableOpacity style={localStyles.scheduleBell} onPress={fetchContacts}>
+            <Ionicons name="refresh-outline" size={22} color={colors.primary} />
+          </TouchableOpacity>
           <TouchableOpacity style={localStyles.scheduleBell} onPress={() => setCallModalVisible(true)}>
             <Ionicons name="alarm-outline" size={22} color={colors.primary} />
           </TouchableOpacity>

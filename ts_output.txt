@@ -1,0 +1,22 @@
+app/(tabs)/index.tsx(481,9): error TS2322: Type 'Date' is not assignable to type 'NotificationTriggerInput'.
+app/(tabs)/index.tsx(720,34): error TS2322: Type '({ key: string; title: string; subtitle: string; action: () => void; textColor: string; icon: string; bgImage: any; bgColor?: undefined; } | { key: string; title: string; subtitle: string; bgColor: string; textColor: string; icon: string; action?: undefined; bgImage?: undefined; })[]' is not assignable to type 'CarouselItem[]'.
+  Type '{ key: string; title: string; subtitle: string; action: () => void; textColor: string; icon: string; bgImage: any; bgColor?: undefined; } | { key: string; title: string; subtitle: string; bgColor: string; textColor: string; icon: string; action?: undefined; bgImage?: undefined; }' is not assignable to type 'CarouselItem'.
+    Type '{ key: string; title: string; subtitle: string; action: () => void; textColor: string; icon: string; bgImage: any; bgColor?: undefined; }' is not assignable to type 'CarouselItem'.
+      Types of property 'icon' are incompatible.
+        Type 'string' is not assignable to type '"push" | "map" | "filter" | "at" | "key" | "notifications" | "search" | "repeat" | "link" | "body" | "code" | "menu" | "time" | "ellipse" | "image" | "stop" | "text" | "navigate" | ... 1339 more ... | undefined'.
+app/(tabs)/notifications.tsx(117,21): error TS2322: Type '({ key: string; title: string; subtitle: string; action: () => Promise<any>; bgColor: string; textColor: string; icon: string; } | { key: string; title: string; subtitle: string; bgColor: string; textColor: string; icon: string; action?: undefined; })[]' is not assignable to type 'CarouselItem[]'.
+  Type '{ key: string; title: string; subtitle: string; action: () => Promise<any>; bgColor: string; textColor: string; icon: string; } | { key: string; title: string; subtitle: string; bgColor: string; textColor: string; icon: string; action?: undefined; }' is not assignable to type 'CarouselItem'.
+    Type '{ key: string; title: string; subtitle: string; bgColor: string; textColor: string; icon: string; action?: undefined; }' is not assignable to type 'CarouselItem'.
+      Types of property 'action' are incompatible.
+        Type 'undefined' is not assignable to type '() => void'.
+app/(tabs)/notifications.tsx(170,21): error TS2322: Type '({ key: string; title: string; subtitle: string; action: () => Promise<any>; bgColor: string; textColor: string; icon: string; } | { key: string; title: string; subtitle: string; bgColor: string; textColor: string; icon: string; action?: undefined; })[]' is not assignable to type 'CarouselItem[]'.
+  Type '{ key: string; title: string; subtitle: string; action: () => Promise<any>; bgColor: string; textColor: string; icon: string; } | { key: string; title: string; subtitle: string; bgColor: string; textColor: string; icon: string; action?: undefined; }' is not assignable to type 'CarouselItem'.
+    Type '{ key: string; title: string; subtitle: string; bgColor: string; textColor: string; icon: string; action?: undefined; }' is not assignable to type 'CarouselItem'.
+      Types of property 'action' are incompatible.
+        Type 'undefined' is not assignable to type '() => void'.
+app/(tabs)/notifications.tsx(196,17): error TS2322: Type '({ key: string; title: string; subtitle: string; action: () => Promise<any>; bgColor: string; textColor: string; icon: string; } | { key: string; title: string; subtitle: string; bgColor: string; textColor: string; icon: string; action?: undefined; })[]' is not assignable to type 'CarouselItem[]'.
+  Type '{ key: string; title: string; subtitle: string; action: () => Promise<any>; bgColor: string; textColor: string; icon: string; } | { key: string; title: string; subtitle: string; bgColor: string; textColor: string; icon: string; action?: undefined; }' is not assignable to type 'CarouselItem'.
+    Type '{ key: string; title: string; subtitle: string; bgColor: string; textColor: string; icon: string; action?: undefined; }' is not assignable to type 'CarouselItem'.
+      Types of property 'action' are incompatible.
+        Type 'undefined' is not assignable to type '() => void'.
+utils/errorTracking.ts(1,25): error TS2307: Cannot find module 'sentry-expo' or its corresponding type declarations.

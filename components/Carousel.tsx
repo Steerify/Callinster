@@ -16,8 +16,9 @@ type CarouselItem = {
   key: string;
   title: string;
   subtitle: string;
-  action: () => void;
-  bgColor: string;
+  action?: () => void;
+  bgColor?: string;
+  bgImage?: any;
   textColor: string;
   icon: string;
 };
